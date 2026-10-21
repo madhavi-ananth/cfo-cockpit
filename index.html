@@ -131,6 +131,7 @@ ul.moved .ab{font-size:12px;color:var(--ink3);margin-top:2px;font-variant-numeri
 ul.moved .why{font-size:12.5px;color:var(--ink2);margin-top:4px;line-height:1.5}
 #tip{position:fixed;pointer-events:none;background:#0B2A5B;color:#fff;border-radius:6px;padding:6px 9px;font-size:12px;display:none;z-index:9;box-shadow:0 4px 16px rgba(0,0,0,.18);max-width:360px}
 #drop{position:fixed;inset:0;background:rgba(31,78,154,.12);border:3px dashed var(--accent);display:none;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:var(--accent);z-index:20}
+.credit{font-size:12px;color:var(--ink2);margin-top:8px}.credit a{color:var(--accent);font-weight:600;text-decoration:none}
 footer{margin-top:36px;font-size:11px;color:var(--ink3);border-top:1px solid var(--border);padding-top:12px}
 @media (max-width:900px){.layout{grid-template-columns:1fr}aside{position:static;height:auto;border-right:none;border-bottom:1px solid var(--border)}aside nav{flex-direction:row;flex-wrap:wrap}aside .spacer{display:none}.tiles{grid-template-columns:repeat(3,1fr)}.card,.card.span3,.card.span4,.card.span8{grid-column:span 12}}
 @media print{html,body{background:#fff}.period{position:static}.layout{display:block}aside,#banner,#drop{display:none}.card,.tile{break-inside:avoid;box-shadow:none}}
@@ -154,14 +155,14 @@ footer{margin-top:36px;font-size:11px;color:var(--ink3);border-top:1px solid var
     <div class="dl">Data</div>
     <div class="dn" id="dataName"></div>
     <div class="ds" id="dataStat"></div>
-    <div class="ds" style="color:#8FA9D3">Version 21 Oct 2026, 00:38 · with budget</div>
+    <div class="ds" style="color:#8FA9D3">Last updated 21 Oct 2026</div>
     <button class="btn primary" id="loadBtn" type="button">Load data (CSV)</button>
     <input type="file" id="fileIn" accept=".csv,text/csv" hidden>
     <button class="btn" id="saveBtn" type="button">Save copy with this data</button>
     <button class="btn" type="button" onclick="window.print()">Print / save as PDF</button>
   </div>
 </aside>
-<main><div class="wrap"><header class="period" id="period"></header><div id="banner"></div><div id="content"></div><footer id="foot"></footer></div></main>
+<main><div class="wrap"><header class="period" id="period"></header><div id="banner"></div><div id="content"></div><footer id="foot"></footer><div class="credit">Prepared by Madhavi Ananth · Method, controls and findings: <a href="https://github.com/madhavi-ananth/cfo-cockpit" target="_blank" rel="noopener">github.com/madhavi-ananth/cfo-cockpit</a></div></div></main>
 </div>
 <div id="tip"></div><div id="drop">Drop the CSV to load it</div>
 <script type="text/csv" id="cockpit-data" data-name="MeridianCloud_Monthly_Summary_24mo.xlsx">
@@ -347,7 +348,7 @@ function runChecks(D) {
   var blanks = [];
   Object.keys(D.raw).forEach(function (k) { c[k].forEach(function (v, i) { if (!isNum(v)) blanks.push(colName(k) + ' (' + L[i] + ')'); }); });
   out.push({ name: 'No blank or unreadable values', ok: !blanks.length && !D.badRows,
-             detail: (blanks.length ? blanks.slice(0, 4).join(', ') + (blanks.length > 4 ? ' and ' + (blanks.length - 4) + ' more' : '') + '. ' : '') + (D.badRows ? D.badRows + ' row(s) skipped: month not recognised.' : '') });
+             detail: (blanks.length ? blanks.slice(0, 4).join(', ') + (blanks.length > 4 ? ' and ' + (blanks.length - 4) + ' more' : '') + '. ' : '') + (D.badRows ? D.badRows + ' row(s) skipped: month not recognized.' : '') });
   function moneyDesc(lbl, rep, exp) { return function (i) { return L[i] + ': ' + lbl + ' ' + money(rep(i), 2) + ', expected ' + money(exp(i), 2); }; }
   tie('Total revenue = sum of revenue streams', raw('rev', 'sub', 'svc', 'usage', 'contra'),
       function (i) { return c.rev[i] - (c.sub[i] + c.svc[i] + c.usage[i] + c.contra[i]); }, 1,
@@ -616,7 +617,7 @@ function sOverview(D, M, checks) {
   t.push(c.om ? tileC('Operating margin', pct(c.om[CUR]), three(rPP(c.om, PRI), rPP(c.om, YOY), hasB ? bMargin(c.om, bLine('opinc', curM)) : null), sparkline(l12(c.om)), c.om[CUR] < 0 ? 'Still loss-making' : '') : tile('Operating margin', '—', '', null, '', 'Not in file'));
   if (c.cash) {
     var note = M.runwayCash === Infinity && M.runwayLoss === Infinity ? 'Cash not falling' :
-      'Runway ' + runwayTxt(Math.min(M.runwayLoss, M.runwayCash)) + '–' + runwayTxt(Math.max(M.runwayLoss, M.runwayCash)) + ' mo (net loss vs cash burn)';
+      'Liquidity ' + runwayTxt(Math.min(M.runwayLoss, M.runwayCash)) + '–' + runwayTxt(Math.max(M.runwayLoss, M.runwayCash)) + ' months (earnings vs cash basis)';
     t.push(tileC('Net cash', money(c.cash[CUR], 2), three(rAmt(c.cash, PRI), rAmt(c.cash, YOY)), sparkline(l12(c.cash)), note));
   } else t.push(tile('Net cash', '—', '', null, '', 'Not in file'));
   t.push(c.cust ? tileC('Customers', num(c.cust[CUR]), three(rNum(c.cust, PRI), rNum(c.cust, YOY)), sparkline(l12(c.cust)), c.arpa ? 'ARPA $' + grp(c.arpa[CUR]) + '/mo' : '') : tile('Customers', '—', '', null, '', 'Not in file'));
@@ -663,7 +664,7 @@ function sOverview(D, M, checks) {
   }
   if (c.accpay) {
     var rises = 0; for (var i = 1; i < n; i++) if (c.accpay[i] > c.accpay[i - 1]) rises++;
-    if (rises >= 0.9 * (n - 1)) w.push(['Accrued payroll', 'Balance ' + money(c.accpay[CUR], 2) + ', up ' + (rises === n - 1 ? 'every month' : 'in ' + rises + ' of ' + (n - 1) + ' months') + ' from ' + money(c.accpay[0], 2) + '. Masks true burn.']);
+    if (rises >= 0.9 * (n - 1)) w.push(['Accrued payroll', 'Balance ' + money(c.accpay[CUR], 2) + ', up ' + (rises === n - 1 ? 'every month' : 'in ' + rises + ' of ' + (n - 1) + ' months') + ' from ' + money(c.accpay[0], 2) + '. Understates the true rate of cash consumption.']);
   }
   if (c.te && c.tl && c.ta && c.te[CUR] < 0) w.push(['Balance sheet', 'Equity ' + money(c.te[CUR]) + (c.loan ? ' with a ' + money(c.loan[CUR]) + ' term loan' : '') + '. Liabilities ' + money(c.tl[CUR]) + ' vs assets ' + money(c.ta[CUR]) + '.']);
   if (M.churnSpike !== undefined) {
@@ -724,7 +725,7 @@ function sProfitability(D, M) {
     var foot = '';
     if (M.cogsStep) {
       foot = 'Cost of revenue has run at ~' + pct(M.cogsStep.now, 0) + ' of revenue over the last 4 months, vs ~' + pct(M.cogsStep.before, 0) + ' in the 8 months before.';
-      if (c.capsw && c.capsw[CUR] > c.capsw[n - 5] * 1.1) foot += ' Capitalised software rose ' + money(c.capsw[n - 5], 2) + ' → ' + money(c.capsw[CUR], 2) + ' over the same period — worth confirming it is not a reclass.';
+      if (c.capsw && c.capsw[CUR] > c.capsw[n - 5] * 1.1) foot += ' Capitalized software rose ' + money(c.capsw[n - 5], 2) + ' → ' + money(c.capsw[CUR], 2) + ' over the same period — worth confirming it is not a reclass.';
     }
     if (ann.length) foot += (foot ? ' ' : '') + 'Dashed lines mark months that stand out against their neighbours.';
     out.push(card('Path to breakeven', legend([['Gross margin %', C.accent], ['Operating margin %', C.dim]]) + chart, { sub: sub, span: 8, foot: foot }));
@@ -752,7 +753,7 @@ function sProfitability(D, M) {
   }
   // efficiency
   if (c.rpf) {
-    out.push(card('Efficiency', '<div class="sub">Revenue per FTE, annualised</div>' +
+    out.push(card('Efficiency', '<div class="sub">Revenue per FTE, annualized</div>' +
       lineChart([{ name: 'Revenue / FTE', vals: c.rpf, color: C.accent }], L, { w: 760, h: 150, fmt: function (v) { return money(v, 0); }, directLabel: false, zeroLine: false, axisFmt: function (v) { return money(v, 0); } }) +
       '<div class="sub" style="margin-top:8px">Headcount (FTE)</div>' +
       barChart(c.hc, L, { w: 760, h: 150, fmt: function (v) { return num(v) + ' FTE'; }, color: C.dim, axisFmt: function (v) { return num(v); } }),
@@ -791,8 +792,8 @@ function sCash(D, M) {
       return '<div class="stat"><div class="v">' + (v === Infinity ? 'n/a' : fmtMo(v) + ' months') + '</div><div class="l">' + label + '</div>' + (txt ? '<div class="l ' + (d >= 0 ? 'good' : 'bad') + '">' + txt + '</div>' : '') + '</div>';
     }
     var body = '<div class="stats" style="grid-template-columns:1fr 1fr">' +
-      st(M.runwayCash, M.burnRate > 0 ? 'Runway on cash burn (' + money(M.burnRate, 0) + '/mo, 12-mo avg)' : 'Cash rose over 12 months', M.runwayCashPrior) +
-      (c.ni ? st(M.runwayLoss, M.lossRate > 0 ? 'Runway on net loss (' + money(M.lossRate, 0) + '/mo, 6-mo avg)' : 'Profitable on a 6-month basis', M.runwayLossPrior) : '') + '</div>';
+      st(M.runwayCash, M.burnRate > 0 ? 'Months of liquidity, cash basis (' + money(M.burnRate, 0) + '/mo, 12-mo avg)' : 'Cash rose over 12 months', M.runwayCashPrior) +
+      (c.ni ? st(M.runwayLoss, M.lossRate > 0 ? 'Months of liquidity, earnings basis (' + money(M.lossRate, 0) + '/mo, 6-mo avg)' : 'Profitable on a 6-month basis', M.runwayLossPrior) : '') + '</div>';
     if (c.ni) {
       var br = [['Net loss', M.ttmNi]], other = M.burn12 - M.ttmNi;
       if (c.defrev) { var dd = c.defrev[CUR] - c.defrev[YOY]; br.push(['Deferred revenue collected ahead of recognition', dd]); other -= dd; }
@@ -804,8 +805,8 @@ function sCash(D, M) {
         '<tr><td><b>Change in net cash</b></td><td class="' + (M.burn12 < 0 ? 'neg' : 'pos') + '"><b>' + money(M.burn12, 2) + '</b></td></tr></tbody></table>';
     }
     var gap = M.burnRate < M.lossRate;
-    out.push(card('Runway', body, { span: 4, sub: gap ? 'Two readings: cash burn is cushioned by liabilities that have not yet been paid' : 'Cash burn and net loss tell a similar story',
-      foot: c.accpay ? 'If accrued bonuses are paid out, runway on cash converges toward the net-loss reading.' : 'The gap between the readings is working capital: cash collected ahead of revenue and costs not yet paid.' }));
+    out.push(card('Liquidity horizon', body, { span: 4, sub: gap ? 'Two bases: the cash basis is supported by liabilities that have not yet been paid' : 'The cash and earnings bases give a similar result',
+      foot: c.accpay ? 'If accrued compensation is paid out, the cash-basis measure converges toward the earnings-basis measure.' : 'The gap between the readings is working capital: cash collected ahead of revenue and costs not yet paid.' }));
   }
 
   // working capital
@@ -825,7 +826,7 @@ function sCash(D, M) {
   // balance sheet
   if (c.ta && c.tl && c.te) {
     var liab = { defrev: 1, accpay: 1, loan: 1, tl: 1 };
-    var items = [['Cash (net)', 'cash'], ['Accounts receivable, net', 'arNet'], ['Deferred commissions', 'defcomm'], ['Capitalised software, net', 'capsw'], ['Total assets', 'ta'],
+    var items = [['Cash (net)', 'cash'], ['Accounts receivable, net', 'arNet'], ['Deferred commissions', 'defcomm'], ['Capitalized software, net', 'capsw'], ['Total assets', 'ta'],
                  ['Deferred revenue', 'defrev'], ['Accrued payroll & bonus', 'accpay'], ['Term loan', 'loan'], ['Total liabilities', 'tl'], ['Total equity', 'te']];
     if (c.ar && c.allow) c.arNet = c.ar.map(function (v, i) { return v + c.allow[i]; });
     var bt = items.filter(function (it) { return c[it[1]]; }).map(function (it) {
@@ -838,7 +839,7 @@ function sCash(D, M) {
   } else out.push(missingCard('Balance sheet: then and now', D, ['ta', 'tl', 'te', 'accpay', 'loan']));
 
   var head = 'Net cash ' + money(c.cash[CUR]);
-  if (M.hasYoY && c.ni) head += M.runwayCash === Infinity ? '; cash is not falling.' : '; roughly ' + runwayTxt(M.runwayCash) + ' months on current burn' + (M.runwayLoss < M.runwayCash ? ', but only ~' + runwayTxt(M.runwayLoss) + ' months on the net-loss run rate.' : '.');
+  if (M.hasYoY && c.ni) head += M.runwayCash === Infinity ? '; cash is not falling.' : '; roughly ' + runwayTxt(M.runwayCash) + ' months of liquidity on a cash basis' + (M.runwayLoss < M.runwayCash ? ', but only ~' + runwayTxt(M.runwayLoss) + ' months on an earnings basis.' : '.');
   return '<h2 id="cash">Cash <span class="lead">' + esc(head) + '</span></h2><div class="grid">' + out.join('') + '</div>';
 }
 
@@ -1012,7 +1013,7 @@ function sAccounts(D) {
 
   var bm = movers.slice().sort(function (x, y) { return Math.abs(y.m) - Math.abs(x.m); })[0], by = movers.slice().sort(function (x, y) { return Math.abs(y.y) - Math.abs(x.y); })[0];
   var sub = (pm && bm ? 'Biggest move vs ' + pm.label + ': ' + bm.n + ' ' + fmtD(bm.m) + '. ' : '') + (py && by ? 'Biggest vs ' + py.label + ': ' + by.n + ' ' + fmtD(by.y) + '.' : '');
-  // expense accounts that carry credits this month (e.g. costs capitalised to the balance sheet)
+  // expense accounts that carry credits this month (e.g. costs capitalized to the balance sheet)
   var credits = [];
   cur.list.forEach(function (a) {
     var g = tbGroup(a), x = cur.acc[a]; if (['cogs', 'sm', 'rd', 'ga'].indexOf(g) < 0 || x.cr < 1) return;
