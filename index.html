@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CFO Cockpit</title>
+<style>
+:root{--bg:#EEF2F8;--card:#FFFFFF;--border:#DCE3EE;--ink:#0F172A;--ink2:#334155;--ink3:#64748B;--accent:#1D4ED8;--navy:#0B2A5B;--neg:#D97706;--grid:#E2E8F0;--zebra:#F5F8FD}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.layout{display:grid;grid-template-columns:216px minmax(0,1fr);min-height:100vh}
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;background:linear-gradient(180deg,#0B2A5B 0%,#081D40 100%);color:#fff;padding:24px 16px 18px;display:flex;flex-direction:column;gap:4px}
+aside .brand{font-size:18px;font-weight:700;margin:0 0 2px;color:#fff;letter-spacing:-.01em}
+aside .co{font-size:12px;color:#BFD3F2;margin-bottom:18px;line-height:1.4}
+aside .co b{color:#fff;font-weight:700}
+aside nav{display:flex;flex-direction:column;gap:2px}
+aside nav a{color:#C7D6EE;text-decoration:none;padding:8px 10px;border-radius:7px;font-size:13.5px;font-weight:500;display:flex;justify-content:space-between;align-items:center;border-left:3px solid transparent}
+aside nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+aside nav a.active{background:rgba(96,165,250,.18);color:#fff;border-left-color:#60A5FA}
+aside nav a.minor{font-size:12.5px;margin-top:6px}
+aside .flag{font-size:11px;font-weight:700;color:#FBBF24}
+aside .flag.ok{color:#93C5FD}
+aside .spacer{flex:1;min-height:16px}
+.databox{border-top:1px solid rgba(255,255,255,.15);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.databox .dl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#8FA9D3}
+.databox .dn{font-size:12px;color:#fff;word-break:break-all;line-height:1.3}
+.databox .ds{font-size:11.5px;color:#BFD3F2;line-height:1.4}
+.databox .ds .bad{color:#FBBF24;font-weight:700}
+.databox .ds .good{color:#93C5FD;font-weight:700}
+.btn{font:inherit;font-size:12.5px;color:var(--ink2);background:#fff;border:1px solid var(--border);border-radius:7px;padding:7px 10px;cursor:pointer;text-align:left}
+.btn:hover{background:#F1F4F8;color:var(--ink)}
+.btn.primary{background:#2563EB;border-color:#2563EB;color:#fff;font-weight:600;text-align:center}
+aside .btn:not(.primary){background:transparent;color:#DCE7F7;border-color:rgba(255,255,255,.25)}
+aside .btn:not(.primary):hover{background:rgba(255,255,255,.08);color:#fff}
+.btn.primary:hover{background:#1D4ED8}
+.wrap{max-width:1240px;margin:0 auto;padding:0 28px 48px;width:100%}
+.period{position:sticky;top:10px;z-index:4;background:linear-gradient(100deg,#0B2A5B 0%,#1D4ED8 100%);color:#fff;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 22px;border-radius:12px;margin-top:14px;flex-wrap:wrap;box-shadow:0 6px 18px rgba(11,42,91,.22)}
+.period .pl{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#BFDBFE;font-weight:700}
+.period .pv{font-size:28px;font-weight:800;letter-spacing:-.01em;color:#fff;line-height:1.15}
+.period .pd{font-size:12.5px;color:#DBEAFE;text-align:right;line-height:1.6}
+.period .pd b{color:#fff;font-weight:700}
+.period .pvrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.fict{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);color:#fff;white-space:nowrap}
+aside .fict{margin-top:6px;font-size:10px;padding:2px 8px;border-color:rgba(255,255,255,.3)}
+#banner{margin-top:16px}
+.banner{border-radius:8px;padding:10px 14px;font-size:13px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.banner.ok{background:#EAF0F9;border:1px solid #C9D7EE;color:#173B74}
+.banner.err{background:#FDF3E6;border:1px solid #F3D3A6;color:#7A4605}
+.banner button{background:none;border:none;font-size:16px;line-height:1;cursor:pointer;color:inherit;padding:0 2px}
+h2{font-size:13.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--navy);margin:30px 0 12px;display:flex;align-items:baseline;gap:12px;padding-left:12px;border-left:4px solid var(--accent);scroll-margin-top:110px}
+h2 .lead{text-transform:none;letter-spacing:0;font-weight:500;color:var(--ink);font-size:14.5px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.tile{background:var(--card);border:1px solid var(--border);border-top:4px solid var(--accent);border-radius:10px;padding:13px 16px 12px;min-height:118px;box-shadow:0 2px 8px rgba(11,42,91,.07)}
+.tile .label{font-size:12px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em}
+.tile .value{font-size:27px;font-weight:800;color:var(--navy);letter-spacing:-.02em;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.tile .delta{font-size:12.5px;font-weight:600;color:var(--ink2)}
+.tile .delta.good{color:var(--accent)}
+.tile .delta.bad{color:var(--neg)}
+.tile .cmp{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;font-size:12px;margin-top:6px;align-items:baseline}
+.tile .cmp .k{color:var(--ink3);white-space:nowrap}
+.tile .cmp .v{font-weight:700;color:var(--ink2);font-variant-numeric:tabular-nums}
+.tile .cmp .v.good{color:var(--accent)}.tile .cmp .v.bad{color:var(--neg)}.tile .cmp .v.na{font-weight:500;color:var(--ink3)}
+.tile .cmp .tag{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;margin-left:4px}
+.tilekey{font-size:12.5px;color:var(--ink2);margin:-4px 0 10px;display:flex;gap:6px 16px;flex-wrap:wrap}
+.tilekey b{color:var(--navy)}
+.tile .note{font-size:11.5px;color:var(--ink3);margin-top:4px}
+.spark{display:block;margin-top:6px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px 14px;grid-column:span 6;position:relative;box-shadow:0 2px 8px rgba(11,42,91,.07)}
+.card.span3{grid-column:span 3}.card.span4{grid-column:span 4}.card.span8{grid-column:span 8}.card.span12{grid-column:span 12}
+.card h3{margin:0;font-size:15px;font-weight:700;color:var(--navy)}
+.card .sub{font-size:12.5px;color:var(--ink2);margin:3px 0 10px}
+.card .foot{font-size:11.5px;color:var(--ink3);margin-top:8px;border-top:1px solid var(--border);padding-top:6px}
+.missing{background:#F6F7F9;border:1px dashed #C9D0DB;border-radius:8px;padding:14px;font-size:12.5px;color:var(--ink2);margin-top:6px}
+.chart{display:block;overflow:visible}
+.tick{font-size:11.5px;fill:#475569;font-weight:500}
+.dlabel{font-size:11.5px;fill:var(--ink);font-weight:700}
+.annot{font-size:11px;fill:#B45309;font-weight:600}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;font-weight:500;color:var(--ink2);margin:0 0 8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+table.t{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+table.t th{text-align:right;font-weight:700;color:var(--navy);font-size:11.5px;padding:8px 8px;background:#E8EFFA;border-bottom:1px solid #C9D6EC;text-transform:uppercase;letter-spacing:.04em}
+table.t th:first-child{border-top-left-radius:6px}table.t th:last-child{border-top-right-radius:6px}
+table.t th:first-child,table.t td:first-child{text-align:left}
+table.t td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--border)}
+table.t tr:last-child td{border-bottom:none}
+table.t tbody tr:nth-child(even) td{background:var(--zebra)}
+table.t tbody tr:hover td{background:#E8F0FE}
+table.t td:not(:first-child),table.t th:not(:first-child){white-space:nowrap}
+table.t td.neg{color:var(--neg);font-weight:600}table.t td.pos{color:var(--accent);font-weight:600}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat .v{font-size:23px;font-weight:800;color:var(--navy);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat .l{font-size:12px;color:var(--ink2)}
+.stat .l.good{color:var(--accent)}.stat .l.bad{color:var(--neg)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:10px}
+ul.watch{margin:0;padding:0;list-style:none}
+ul.watch li{padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;display:flex;gap:10px}
+ul.watch li:last-child{border-bottom:none}
+ul.watch li b{color:var(--neg);font-weight:700;white-space:nowrap}
+ul.watch li.ok b{color:var(--accent)}
+ul.checks{margin:0;padding:0;list-style:none}
+ul.checks li{display:grid;grid-template-columns:22px 1fr;gap:6px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+ul.checks li:last-child{border-bottom:none}
+ul.checks .mk{font-weight:700;color:var(--accent)}
+ul.checks li.fail .mk{color:var(--neg)}
+ul.checks .dt{display:block;font-size:12px;color:var(--neg);margin-top:2px}
+table.acc td,table.acc th{padding:5px 8px}
+table.acc tr.grp td{font-weight:800;color:var(--accent);font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding-top:14px;background:#fff !important}
+table.acc tr.acct td:first-child{padding-left:14px}
+table.acc .acno{display:inline-block;min-width:46px;color:var(--ink3);font-size:11.5px}
+table.acc tr.sub td{font-weight:600}
+table.acc tr.key td{font-weight:800;background:#DCE8FB !important;color:var(--navy)}
+table.acc tr.tie td{font-size:12px;font-weight:700;color:var(--accent);border-top:2px solid #C9D6EC;background:#fff !important}
+table.acc tr.tie td.bad{color:var(--neg)}
+section.collapsed tr.acct,section.collapsed tr.grp{display:none}
+.card .tbtoggle{position:absolute;top:12px;right:14px;padding:5px 10px;font-size:12px}
+.stale{background:#FDF3E6;border:1px solid #F3D3A6;color:#7A4605;border-radius:7px;padding:8px 12px;font-size:12.5px;margin:4px 0 10px}
+.fu{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.fu.f{background:#DBEAFE;color:#1D4ED8}.fu.u{background:#FEF3C7;color:#B45309}
+.conv{display:flex;gap:10px 22px;flex-wrap:wrap;align-items:center;background:#F1F6FF;border:1px solid #CFE0FB;border-radius:10px;padding:10px 14px;font-size:13px;color:var(--ink);margin:2px 0 12px}
+.conv b{color:var(--navy)}
+table.bv th.grp{text-align:center;background:#D6E3F8;border-bottom:1px solid #C9D6EC}
+table.bv td.sep,table.bv th.sep{border-left:2px solid #C9D6EC}
+table.bv tr.tot td{font-weight:800;color:var(--navy)}
+ul.moved{margin:0;padding:0;list-style:none}
+ul.moved li{padding:11px 0;border-bottom:1px solid var(--border)}
+ul.moved li:last-child{border-bottom:none}
+ul.moved .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+ul.moved .nm{font-weight:700;color:var(--ink)}
+ul.moved .nm small{font-weight:500;color:var(--ink3);margin-left:6px}
+ul.moved .amt{font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+ul.moved .amt.f{color:var(--accent)}ul.moved .amt.u{color:var(--neg)}
+ul.moved .ab{font-size:12px;color:var(--ink3);margin-top:2px;font-variant-numeric:tabular-nums}
+ul.moved .why{font-size:12.5px;color:var(--ink2);margin-top:4px;line-height:1.5}
+#tip{position:fixed;pointer-events:none;background:#0B2A5B;color:#fff;border-radius:6px;padding:6px 9px;font-size:12px;display:none;z-index:9;box-shadow:0 4px 16px rgba(0,0,0,.18);max-width:360px}
+#drop{position:fixed;inset:0;background:rgba(31,78,154,.12);border:3px dashed var(--accent);display:none;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:var(--accent);z-index:20}
+footer{margin-top:36px;font-size:11px;color:var(--ink3);border-top:1px solid var(--border);padding-top:12px}
+@media (max-width:900px){.layout{grid-template-columns:1fr}aside{position:static;height:auto;border-right:none;border-bottom:1px solid var(--border)}aside nav{flex-direction:row;flex-wrap:wrap}aside .spacer{display:none}.tiles{grid-template-columns:repeat(3,1fr)}.card,.card.span3,.card.span4,.card.span8{grid-column:span 12}}
+@media print{html,body{background:#fff}.period{position:static}.layout{display:block}aside,#banner,#drop{display:none}.card,.tile{break-inside:avoid;box-shadow:none}}
+</style></head>
+<body data-company="Meridian Cloud, Inc.">
+<div class="layout">
+<aside>
+  <div class="brand">CFO Cockpit</div>
+  <div class="co" id="co"></div>
+  <nav>
+    <a href="#overview">Overview <span class="flag" id="flag-overview"></span></a>
+    <a href="#profitability">Profitability <span class="flag" id="flag-profitability"></span></a>
+    <a href="#accounts" id="nav-accounts">Account P&amp;L <span class="flag" id="flag-accounts"></span></a>
+    <a href="#budget" id="nav-budget">Actual vs Budget <span class="flag" id="flag-budget"></span></a>
+    <a href="#cash">Cash <span class="flag" id="flag-cash"></span></a>
+    <a href="#customers">Customers <span class="flag" id="flag-customers"></span></a>
+    <a href="#checks" class="minor">Data checks <span class="flag" id="flag-checks"></span></a>
+  </nav>
+  <div class="spacer"></div>
+  <div class="databox">
+    <div class="dl">Data</div>
+    <div class="dn" id="dataName"></div>
+    <div class="ds" id="dataStat"></div>
+    <div class="ds" style="color:#8FA9D3">Version 21 Oct 2026, 00:38 · with budget</div>
+    <button class="btn primary" id="loadBtn" type="button">Load data (CSV)</button>
+    <input type="file" id="fileIn" accept=".csv,text/csv" hidden>
+    <button class="btn" id="saveBtn" type="button">Save copy with this data</button>
+    <button class="btn" type="button" onclick="window.print()">Print / save as PDF</button>
+  </div>
+</aside>
+<main><div class="wrap"><header class="period" id="period"></header><div id="banner"></div><div id="content"></div><footer id="foot"></footer></div></main>
+</div>
+<div id="tip"></div><div id="drop">Drop the CSV to load it</div>
+<script type="text/csv" id="cockpit-data" data-name="MeridianCloud_Monthly_Summary_24mo.xlsx">
+Month,Month Name,Subscription Revenue,Professional Services Revenue,Usage & Overage Revenue,Contra Revenue,Total Revenue,Cost of Revenue,Gross Profit,Sales & Marketing,Research & Development,General & Administrative,Total Operating Expenses,Operating Income,Other Income / (Expense),Income Tax,Net Income,Cash - Operating,Cash - Money Market,Accounts Receivable,Unbilled Receivables,Allowance for Doubtful Accounts,Prepaid Expenses,Deferred Commissions,"Capitalised Software, net",Property & Equipment,Accumulated Depreciation,Accounts Payable,Accrued Expenses,Accrued Payroll & Bonus,Deferred Revenue,Sales Tax Payable,Notes Payable - Term Loan,Common Stock,Additional Paid-In Capital,Retained Earnings (opening),Total Assets,Total Liabilities,Total Equity (incl. YTD result),Opening MRR,New MRR,Expansion MRR,Contraction MRR,Churned MRR,Closing MRR,ARR,Active Customers,New Customers,Churned Customers,Headcount (FTE),Total Cash
+2024-09,Sep 2024,880589.05,19328.44,54859.32,-4216.66,950560.15,278672.67,671887.48,402215.88,346910.40,258125.07,1007251.35,-335363.87,-7600,4000,-346963.87,2333887.19,3512200,1082834.57,204.72,-98775.07,385000,1189413.95,1478368.60,620000,-293750,741332.97,314000,760264.53,2492926.67,96000,2500000,12000,28400000,-24760176.34,10209383.96,6904524.17,3304859.79,853449.99,18583.34,9592.21,-1036.49,0.00,880589.05,10567068.60,308,8,0,57,5846087.19
+2024-10,Oct 2024,917182.52,29830.79,62098.26,-1313.24,1007798.33,301999.58,705798.75,521409.32,347440.40,258554.72,1127404.44,-421605.69,-7600,4000,-433205.69,1602536.41,3524400,1957787.63,713.56,-102769.79,385000,1146072.56,1474669.52,620000,-302500,498047.55,318000,895137.76,3127070.48,96000,2500000,12000,28400000,-24760176.34,10305909.89,7434255.79,2871654.10,880589.05,31916.67,8382.95,-914.49,-2791.66,917182.52,11006190.24,314,8,2,59,5126936.41
+2024-11,Nov 2024,934830.76,18511.15,66246.46,-2345.11,1017243.26,314756.14,702487.12,427152.79,347970.40,258811.08,1033934.27,-331447.15,-7600,4000,-343047.15,1426653.70,3536600,2030311.67,11399.26,-106810.87,385000,1094253.31,1468902.77,620000,-311250,435887.16,322000,1020422.59,3252143.14,96000,2500000,12000,28400000,-24760176.34,10155059.84,7626452.89,2528606.95,917182.52,17358.33,11280.04,-1181.81,-9808.33,934830.76,11217969.12,317,8,5,60,4963253.70
+2024-12,Dec 2024,968091.21,42941.37,50387.75,-675.00,1060745.33,322136.38,738608.95,448836.00,348500.40,259198.71,1056535.11,-317926.16,-7600,4000,-329526.16,1132511.78,3548800,2663951.83,1515.10,-111029.58,385000,1049228.46,1461068.34,620000,-320000,447534.99,326000,1158123.63,3704306.52,96000,2500000,12000,28400000,-24760176.34,10431045.93,8231965.14,2199080.79,934830.76,28025.00,12060.26,-3453.69,-3371.17,968091.21,11617094.52,320,6,3,61,4681311.78
+2025-01,Jan 2025,982242.66,8966.26,55396.68,-1874.21,1044731.39,327947.82,716783.57,448288.88,358267.26,279498.19,1086054.33,-369270.76,-7600,4000,-380870.76,1219632.85,3561000,2585933.72,4175.79,-115177.77,385000,989296.24,1453699.14,620000,-328750,416283.91,330000,1280448.43,3933867.60,96000,2500000,12000,28400000,-24760176.34,10374809.97,8556599.94,1818210.03,968091.21,11900.00,6618.97,-2306.09,-2061.41,982242.66,11786911.92,322,6,4,62,4780632.85
+2025-02,Feb 2025,1016290.65,34977.89,73750.40,-1491.67,1123527.27,333838.89,789688.38,480152.84,358797.26,280031.83,1118981.93,-329293.55,-7600,4000,-340893.55,1464150.93,3573200,2253923.67,1221.96,-119649.60,385000,942239.46,1444189.90,620000,-337500,459488.37,334000,1424202.50,3935768.97,96000,2500000,12000,28400000,-24760176.34,10226776.32,8749459.84,1477316.48,982242.66,32733.34,6244.79,-1596.81,-3333.33,1016290.65,12195487.80,328,10,4,63,5037350.93
+2025-03,Mar 2025,1045345.42,26552.95,65730.49,-4980.96,1132647.90,337214.07,795433.83,568870.82,374956.59,280279.48,1224106.89,-428673.06,-7600,4000,-440273.06,1087864.02,3585400,2368865.23,4551.69,-124159.08,385000,889410.03,1436826.43,620000,-346250,491624.39,338000,1563120.38,3881720.13,96000,2500000,12000,28400000,-24760176.34,9907508.32,8870464.90,1037043.42,1016290.65,23199.99,8235.74,-1402.31,-978.62,1045345.42,12544145.04,337,10,1,64,4673264.02
+2025-04,Apr 2025,1079526.48,30514.54,62276.94,-1125.00,1171192.96,342181.45,829011.51,503150.69,400416.02,280640.99,1184207.70,-355196.19,-7600,4000,-366796.19,994616.05,3597600,2166783.89,8744.89,-128820.07,385000,844022.92,1434036.52,620000,-355000,470549.31,342000,1719581.94,3768605.72,96000,2500000,12000,28400000,-24760176.34,9566984.20,8896736.97,670247.23,1045345.42,34591.66,9384.83,-1053.66,-8741.76,1079526.48,12954317.76,341,9,5,67,4592216.05
+2025-05,May 2025,1107066.47,5697.08,73796.88,-1325.28,1185235.15,348155.30,837079.85,502303.38,415068.38,295526.37,1212898.13,-375818.28,-7600,4000,-387418.28,724289.27,3609800,2193627.30,17210.77,-133528.44,385000,790693.21,1432661.40,620000,-363750,457293.05,346000,1869689.47,3724192.04,96000,2500000,12000,28400000,-24760176.34,9276003.51,8993174.56,282828.95,1079526.48,7875.00,25391.01,-1595.48,-4130.51,1107066.47,13284797.64,345,8,4,69,4334089.27
+2025-06,Jun 2025,1129357.25,2797.70,70232.47,-1437.58,1200949.84,349186.28,851763.56,592321.75,415598.38,295804.94,1303725.07,-451961.51,-7600,4000,-463561.51,666208.10,3622000,1664881.73,34863.94,-138305.38,385000,730662.37,1428717.82,620000,-372500,552549.35,350000,2012790.17,3310921.62,96000,2500000,12000,28400000,-24760176.34,8641528.58,8822261.14,-180732.56,1107066.47,5175.01,18922.32,-958.15,-848.42,1129357.25,13552287.00,349,6,2,70,4288208.10
+2025-07,Jul 2025,1161418.81,30707.95,75178.40,-7961.32,1259343.84,373045.02,886298.82,532322.83,446439.81,296275.38,1275038.02,-388739.20,-7600,4000,-400339.20,3128.67,3634200,2020981.69,68885.30,-143342.76,385000,683187.23,1430517.67,620000,-381250,493801.20,354000,2181556.48,3277021.88,96000,2500000,12000,28400000,-24760176.34,8321307.80,8902379.56,-581071.76,1129357.25,28525.01,15731.63,-2309.72,-9885.36,1161418.81,13937025.72,356,12,5,73,3637328.67
+2025-08,Aug 2025,1192830.09,21239.14,74137.20,-7188.78,1281017.65,381691.79,899325.86,535809.65,446969.81,296572.07,1279351.53,-380025.67,-7600,4000,-391625.67,-355708.88,3646400,2539853.97,67361.77,-148466.83,385000,634228.01,1429511.58,620000,-390000,503112.94,358000,2349594.62,3594169.49,96000,2500000,12000,28400000,-24760176.34,8428179.62,9400877.05,-972697.43,1161418.81,19250.02,24248.11,-2424.78,-9662.07,1192830.09,14313961.08,362,10,4,73,3290691.12
+2025-09,Sep 2025,1225510.14,9209.57,88682.13,-517.88,1322883.96,401875.37,921008.59,538538.73,447499.81,296916.28,1282954.82,-361946.23,-7600,4000,-373546.23,-169881.04,3658600,1870637.30,136653.71,-153725.11,385000,579119.31,1425699.56,620000,-398750,506469.36,362000,2512263.44,3322864.59,96000,2500000,12000,28400000,-24760176.34,7953353.73,9299597.39,-1346243.66,1192830.09,14275.01,21256.48,-1528.72,-1322.71,1225510.14,14706121.68,368,8,2,75,3488718.96
+2025-10,Oct 2025,1239045.08,17034.38,68874.05,-3231.32,1321722.19,413213.09,908509.10,629290.47,448029.81,297131.16,1374451.44,-465942.34,-7600,4000,-477542.34,-695478.09,3670800,2895947.98,112506.31,-158988.27,385000,516522.02,1419081.60,620000,-407500,549964.96,366000,2665041.59,4004671.00,96000,2500000,12000,28400000,-24760176.34,8357891.55,10181677.55,-1823786.00,1225510.14,15341.67,9887.04,-417.60,-11276.11,1239045.08,14868540.96,372,7,3,75,2975321.91
+2025-11,Nov 2025,1281057.70,35274.65,80540.40,-2383.94,1394488.81,419321.52,975167.29,562874.75,448559.81,297618.58,1309053.14,-333885.85,-7600,4000,-345485.85,-789222.10,3683000,3318061.86,88715.50,-164528.85,385000,468614.40,1409657.70,620000,-416250,528676.16,370000,2841562.73,4436081.47,96000,2500000,12000,28400000,-24760176.34,8603048.51,10772320.36,-2169271.85,1239045.08,31508.35,17203.74,-1452.14,-5247.32,1281057.70,15372692.40,378,9,3,76,2893777.90
+2025-12,Dec 2025,1297716.71,10827.65,68090.54,-5823.36,1370811.54,431987.01,938824.53,553011.46,449089.80,297734.97,1299836.23,-361011.70,-7600,4000,-372611.70,62169.24,3695200,2726925.16,123155.49,-169975.82,385000,402861.25,1397427.86,620000,-425000,525618.25,374000,2994608.75,4869419.73,96000,2500000,12000,28400000,-24760176.34,8817763.18,11359646.73,-2541883.55,1281057.70,11258.35,11661.89,-2154.10,-4107.10,1297716.71,15572600.52,383,9,4,77,3757369.24
+2026-01,Jan 2026,1320477.67,25625.48,63395.43,-1389.52,1408109.06,445137.92,962971.14,571257.41,506093.78,304007.86,1381359.05,-418387.91,-7600,4000,-429987.91,274129.31,3707400,2867103.15,52431.20,-175564.10,385000,344270.19,1397878.18,620000,-433750,534096.91,378000,3170344.22,5332328.26,96000,2500000,12000,28400000,-24760176.34,9038897.93,12010769.39,-2971871.46,1297716.71,23650.00,11085.96,-728.68,-11246.34,1320477.67,15845732.04,388,10,5,79,3981529.31
+2026-02,Feb 2026,1354830.71,38276.81,99533.83,-4863.49,1487777.86,508516.83,979261.03,571747.10,506623.79,349659.77,1428030.66,-448769.63,-7600,4000,-460369.63,504630.65,3719600,2718513.19,53478.62,-181460.01,385000,290680.92,1395080.10,620000,-442500,584147.25,382000,3360969.90,5572147.41,96000,2500000,12000,28400000,-24760176.34,9063023.47,12495264.56,-3432241.09,1320477.67,32058.33,11575.24,-4034.11,-5246.40,1354830.71,16257968.52,392,8,4,82,4224230.65
+2026-03,Mar 2026,1381475.86,9893.19,82329.57,-1980.89,1471717.73,462632.66,1009085.07,589736.73,507153.77,349804.78,1446695.28,-437610.21,-7600,4000,-449210.21,573233.96,3731800,2250674.30,23365.41,-187290.93,385000,302802.49,1389033.62,620000,-451250,598496.77,386000,3547075.03,5391248.35,96000,2500000,12000,28400000,-24760176.34,8637368.85,12518820.15,-3881451.30,1354830.71,11025.00,29220.85,-2266.94,-11333.79,1381475.86,16577710.32,397,10,5,82,4305033.96
+2026-04,Apr 2026,1379103.46,34939.25,90963.40,-1308.33,1503697.78,469013.65,1034684.13,522785.19,518958.20,350160.11,1391903.50,-357219.37,-7600,4000,-368819.37,117629.99,3744000,2500297.08,36144.22,-193267.18,385000,323110.70,1382830.38,620000,-460000,522757.86,390000,3749812.62,5447445.38,96000,2500000,12000,28400000,-24760176.34,8455745.19,12706015.86,-4250270.67,1381475.86,31416.67,22819.57,-3506.66,-53101.99,1379103.46,16549241.52,396,6,7,84,3861629.99
+2026-05,May 2026,1395689.11,12648.39,103535.08,-9789.27,1502083.31,398991.90,1103091.41,514678.06,519488.20,548255.49,1582421.75,-479330.34,-7600,4000,-490930.34,-523684.38,3756200,2859346.19,49477.63,-199274.11,385000,320672.72,1447290.41,620000,-468750,739986.98,394000,3922273.11,5335219.38,96000,2500000,12000,28400000,-24760176.34,8246278.46,12987479.47,-4741201.01,1379103.46,11949.99,9140.77,-2975.55,-1529.53,1395689.11,16748269.32,404,9,1,85,3232515.62
+2026-06,Jun 2026,1416647.72,20705.17,80349.76,-2501.49,1515201.16,409628.75,1105572.41,661190.95,520018.19,363489.73,1544698.87,-439126.46,-7600,4000,-450726.46,-622313.00,3768400,2053575.27,128223.89,-205305.28,385000,324470.07,1508413.71,620000,-477500,659409.88,398000,4107580.84,4913901.41,96000,2500000,12000,28400000,-24760176.34,7482964.66,12674892.13,-5191927.47,1395689.11,19374.99,12041.75,-567.30,-9890.84,1416647.72,16999772.64,407,6,3,85,3146087.00
+2026-07,Jul 2026,1444504.11,14485.13,97293.00,-5640.45,1550641.79,406278.12,1144363.67,591639.33,520548.20,363853.10,1476040.63,-331676.96,-7600,4000,-343276.96,-1086889.16,3780600,2169496.83,174572.26,-211489.82,385000,328862.91,1566200.28,620000,-486250,590060.55,402000,4292840.99,4894406.19,96000,2500000,12000,28400000,-24760176.34,7240103.30,12775307.73,-5535204.43,1416647.72,17233.33,16183.46,-2203.47,-3356.97,1444504.11,17334049.32,414,11,4,86,2693710.84
+2026-08,Aug 2026,1492710.01,32322.44,94130.50,-905.39,1618257.56,418431.55,1199826.01,567572.69,521078.20,387337.82,1475988.71,-276162.70,-7600,4000,-287762.70,-1676380.97,3792800,3001428.29,29772.78,-217924.88,385000,348902.76,1620650.12,620000,-495000,551832.08,406000,4506759.88,5171623.27,96000,2500000,12000,28400000,-24760176.34,7409248.10,13232215.23,-5822967.13,1444504.11,26608.35,32047.88,-1492.65,-8957.63,1492710.01,17912520.12,420,9,3,87,2116419.03
+</script>
+<script type="application/json" id="tb-data">{"file":"MeridianCloud_Trial_Balance_Aug_2026.xlsx","convention":"debit-positive","headerRow":5,"periods":[{"label":"Aug 2026","tab":"TB_Aug_2026","accounts":[["1010","Cash - Operating","Bank","Balance Sheet",-1086889.16,1208342.66,1797834.47,-1676380.97],["1020","Cash - Money Market","Bank","Balance Sheet",3780600.0,12200.0,0.0,3792800.0],["1100","Accounts Receivable","Accounts Receivable","Balance Sheet",2169496.83,2041179.51,1209248.05,3001428.29],["1120","Unbilled Receivables","Other Current Asset","Balance Sheet",174572.26,23655.07,168454.55,29772.78],["1150","Allowance for Doubtful Accounts","Accounts Receivable","Balance Sheet",-211489.82,0.0,6435.06,-217924.88],["1200","Prepaid Expenses","Other Current Asset","Balance Sheet",385000.0,0.0,0.0,385000.0],["1250","Deferred Commissions","Other Current Asset","Balance Sheet",328862.91,39416.99,19377.14,348902.76],["1300","Capitalized Software, net","Fixed Asset","Balance Sheet",1566200.28,120122.32,65672.48,1620650.12],["1500","Property & Equipment","Fixed Asset","Balance Sheet",620000.0,0.0,0.0,620000.0],["1550","Accumulated Depreciation","Fixed Asset","Balance Sheet",-486250.0,0.0,8750.0,-495000.0],["2010","Accounts Payable","Accounts Payable","Balance Sheet",-590060.55,622235.83,584007.36,-551832.08],["2050","Accrued Expenses","Other Current Liability","Balance Sheet",-402000.0,0.0,4000.0,-406000.0],["2100","Accrued Payroll & Bonus","Other Current Liability","Balance Sheet",-4292840.99,1155798.64,1369717.53,-4506759.88],["2200","Deferred Revenue - Current","Other Current Liability","Balance Sheet",-4894406.19,941495.12,1218712.2,-5171623.27],["2300","Sales Tax Payable","Other Current Liability","Balance Sheet",-96000.0,0.0,0.0,-96000.0],["2500","Notes Payable - Term Loan","Long Term Liability","Balance Sheet",-2500000.0,0.0,0.0,-2500000.0],["3010","Common Stock","Equity","Balance Sheet",-12000.0,0.0,0.0,-12000.0],["3020","Additional Paid-In Capital","Equity","Balance Sheet",-28400000.0,0.0,0.0,-28400000.0],["3900","Retained Earnings","Equity","Balance Sheet",24760176.34,0.0,0.0,24760176.34],["40100","Subscription Revenue","Income","Profit & Loss",-27150829.64,0.0,1492710.01,-28643539.65],["40200","Professional Services Revenue","Income","Profit & Loss",-500984.93,0.0,32322.44,-533307.37],["40300","Usage & Overage Revenue","Income","Profit & Loss",-1707678.44,0.0,94130.5,-1801808.94],["40900","Contra Revenue - Credits & Discounts","Income","Profit & Loss",75364.75,905.39,0.0,76270.14],["50100","Hosting & Infrastructure","COGS","Profit & Loss",1882314.7,101557.8,0.0,1983872.5],["50200","Third-Party Software & Licenses","COGS","Profit & Loss",582449.09,32175.28,0.0,614624.37],["50300","Customer Support Salaries & Benefits","COGS","Profit & Loss",1896106.92,118091.84,0.0,2014198.76],["50400","Services Delivery Salaries & Benefits","COGS","Profit & Loss",1991819.87,83584.12,0.0,2075403.99],["50500","Payment Processing Fees","COGS","Profit & Loss",266844.85,17350.03,0.0,284194.88],["50600","Amortization of Capitalized Software","COGS","Profit & Loss",2157886.78,65672.48,0.0,2223559.26],["60100","Sales & Marketing Salaries & Benefits","Expense","Profit & Loss",5856381.33,309598.31,0.0,6165979.64],["60110","Sales Commissions","Expense","Profit & Loss",232241.66,16892.99,0.0,249134.65],["60120","Amortization of Deferred Commissions","Expense","Profit & Loss",1453034.28,19377.14,0.0,1472411.42],["60200","Marketing Programs & Demand Gen","Expense","Profit & Loss",3310968.47,176964.03,0.0,3487932.5],["60210","Events & Conferences","Expense","Profit & Loss",950999.98,19000.0,0.0,969999.98],["60300","Travel & Entertainment","Expense","Profit & Loss",465959.29,25740.22,0.0,491699.51],["61100","Engineering Salaries & Benefits","Expense","Profit & Loss",7956308.49,546010.52,120122.32,8382196.69],["61200","Engineering Contractors","Expense","Profit & Loss",1361139.98,63740.0,0.0,1424879.98],["61300","Development Tools & Environments","Expense","Profit & Loss",681950.0,31450.0,0.0,713400.0],["62100","G&A Salaries & Benefits","Expense","Profit & Loss",4044480.84,256122.76,0.0,4300603.6],["62200","Rent & Facilities","Expense","Profit & Loss",943000.0,41000.0,0.0,984000.0],["62300","Legal & Professional Fees","Expense","Profit & Loss",691000.0,22000.0,0.0,713000.0],["62400","Insurance","Expense","Profit & Loss",322000.0,14000.0,0.0,336000.0],["62500","Bad Debt Expense","Expense","Profit & Loss",116489.82,6435.06,0.0,122924.88],["62600","Depreciation Expense","Expense","Profit & Loss",201250.0,8750.0,0.0,210000.0],["62700","Bank & Merchant Fees","Expense","Profit & Loss",73600.0,3200.0,0.0,76800.0],["62800","Corporate Software & Subscriptions","Expense","Profit & Loss",766130.0,35830.0,0.0,801960.0],["70100","Interest Income","Other Income","Profit & Loss",-280600.0,0.0,12200.0,-292800.0],["70200","Interest Expense","Other Expense","Profit & Loss",455400.0,19800.0,0.0,475200.0],["80100","Income Tax Provision","Other Expense","Profit & Loss",92000.0,4000.0,0.0,96000.0]]},{"label":"Jul 2026","tab":"TB_Jul_2026","accounts":[["1010","Cash - Operating","Bank","Balance Sheet",-622313.0,1368876.64,1833452.8,-1086889.16],["1020","Cash - Money Market","Bank","Balance Sheet",3768400.0,12200.0,0.0,3780600.0],["1100","Accounts Receivable","Accounts Receivable","Balance Sheet",2053575.27,1490438.65,1374517.09,2169496.83],["1120","Unbilled Receivables","Other Current Asset","Balance Sheet",128223.89,84697.27,38348.9,174572.26],["1150","Allowance for Doubtful Accounts","Accounts Receivable","Balance Sheet",-205305.28,0.0,6184.54,-211489.82],["1200","Prepaid Expenses","Other Current Asset","Balance Sheet",385000.0,0.0,0.0,385000.0],["1250","Deferred Commissions","Other Current Asset","Balance Sheet",324470.07,22456.08,18063.24,328862.91],["1300","Capitalized Software, net","Fixed Asset","Balance Sheet",1508413.71,120122.32,62335.75,1566200.28],["1500","Property & Equipment","Fixed Asset","Balance Sheet",620000.0,0.0,0.0,620000.0],["1550","Accumulated Depreciation","Fixed Asset","Balance Sheet",-477500.0,0.0,8750.0,-486250.0],["2010","Accounts Payable","Accounts Payable","Balance Sheet",-659409.88,690332.56,620983.23,-590060.55],["2050","Accrued Expenses","Other Current Liability","Balance Sheet",-398000.0,0.0,4000.0,-402000.0],["2100","Accrued Payroll & Bonus","Other Current Liability","Balance Sheet",-4107580.84,1123320.24,1308580.39,-4292840.99],["2200","Deferred Revenue - Current","Other Current Liability","Balance Sheet",-4913901.41,847632.86,828137.64,-4894406.19],["2300","Sales Tax Payable","Other Current Liability","Balance Sheet",-96000.0,0.0,0.0,-96000.0],["2500","Notes Payable - Term Loan","Long Term Liability","Balance Sheet",-2500000.0,0.0,0.0,-2500000.0],["3010","Common Stock","Equity","Balance Sheet",-12000.0,0.0,0.0,-12000.0],["3020","Additional Paid-In Capital","Equity","Balance Sheet",-28400000.0,0.0,0.0,-28400000.0],["3900","Retained Earnings","Equity","Balance Sheet",24760176.34,0.0,0.0,24760176.34],["40100","Subscription Revenue","Income","Profit & Loss",-25706325.53,0.0,1444504.11,-27150829.64],["40200","Professional Services Revenue","Income","Profit & Loss",-486499.8,0.0,14485.13,-500984.93],["40300","Usage & Overage Revenue","Income","Profit & Loss",-1610385.44,0.0,97293.0,-1707678.44],["40900","Contra Revenue - Credits & Discounts","Income","Profit & Loss",69724.3,5640.45,0.0,75364.75],["50100","Hosting & Infrastructure","COGS","Profit & Loss",1783639.7,98675.0,0.0,1882314.7],["50200","Third-Party Software & Licenses","COGS","Profit & Loss",551526.41,30922.68,0.0,582449.09],["50300","Customer Support Salaries & Benefits","COGS","Profit & Loss",1778015.08,118091.84,0.0,1896106.92],["50400","Services Delivery Salaries & Benefits","COGS","Profit & Loss",1908235.75,83584.12,0.0,1991819.87],["50500","Payment Processing Fees","COGS","Profit & Loss",254176.12,12668.73,0.0,266844.85],["50600","Amortization of Capitalized Software","COGS","Profit & Loss",2095551.03,62335.75,0.0,2157886.78],["60100","Sales & Marketing Salaries & Benefits","Expense","Profit & Loss",5560666.1,295715.23,0.0,5856381.33],["60110","Sales Commissions","Expense","Profit & Loss",222617.62,9624.04,0.0,232241.66],["60120","Amortization of Deferred Commissions","Expense","Profit & Loss",1434971.04,18063.24,0.0,1453034.28],["60200","Marketing Programs & Demand Gen","Expense","Profit & Loss",3086469.8,224498.67,0.0,3310968.47],["60210","Events & Conferences","Expense","Profit & Loss",931999.98,19000.0,0.0,950999.98],["60300","Travel & Entertainment","Expense","Profit & Loss",441221.14,24738.15,0.0,465959.29],["61100","Engineering Salaries & Benefits","Expense","Profit & Loss",7530420.29,546010.52,120122.32,7956308.49],["61200","Engineering Contractors","Expense","Profit & Loss",1297779.98,63360.0,0.0,1361139.98],["61300","Development Tools & Environments","Expense","Profit & Loss",650650.0,31300.0,0.0,681950.0],["62100","G&A Salaries & Benefits","Expense","Profit & Loss",3811382.28,233098.56,0.0,4044480.84],["62200","Rent & Facilities","Expense","Profit & Loss",902000.0,41000.0,0.0,943000.0],["62300","Legal & Professional Fees","Expense","Profit & Loss",669000.0,22000.0,0.0,691000.0],["62400","Insurance","Expense","Profit & Loss",308000.0,14000.0,0.0,322000.0],["62500","Bad Debt Expense","Expense","Profit & Loss",110305.28,6184.54,0.0,116489.82],["62600","Depreciation Expense","Expense","Profit & Loss",192500.0,8750.0,0.0,201250.0],["62700","Bank & Merchant Fees","Expense","Profit & Loss",70400.0,3200.0,0.0,73600.0],["62800","Corporate Software & Subscriptions","Expense","Profit & Loss",730510.0,35620.0,0.0,766130.0],["70100","Interest Income","Other Income","Profit & Loss",-268400.0,0.0,12200.0,-280600.0],["70200","Interest Expense","Other Expense","Profit & Loss",435600.0,19800.0,0.0,455400.0],["80100","Income Tax Provision","Other Expense","Profit & Loss",88000.0,4000.0,0.0,92000.0]]},{"label":"Aug 2025","tab":"TB_Aug_2025","accounts":[["1010","Cash - Operating","Bank","Balance Sheet",3128.67,1080816.51,1439654.06,-355708.88],["1020","Cash - Money Market","Bank","Balance Sheet",3634200.0,12200.0,0.0,3646400.0],["1100","Accounts Receivable","Accounts Receivable","Balance Sheet",2020981.69,1606877.57,1088005.29,2539853.97],["1120","Unbilled Receivables","Other Current Asset","Balance Sheet",68885.3,51918.36,53441.89,67361.77],["1150","Allowance for Doubtful Accounts","Accounts Receivable","Balance Sheet",-143342.76,0.0,5124.07,-148466.83],["1200","Prepaid Expenses","Other Current Asset","Balance Sheet",385000.0,0.0,0.0,385000.0],["1250","Deferred Commissions","Other Current Asset","Balance Sheet",683187.23,29230.74,78189.96,634228.01],["1300","Capitalized Software, net","Fixed Asset","Balance Sheet",1430517.67,101013.79,102019.88,1429511.58],["1500","Property & Equipment","Fixed Asset","Balance Sheet",620000.0,0.0,0.0,620000.0],["1550","Accumulated Depreciation","Fixed Asset","Balance Sheet",-381250.0,0.0,8750.0,-390000.0],["2010","Accounts Payable","Accounts Payable","Balance Sheet",-493801.2,493801.2,503112.94,-503112.94],["2050","Accrued Expenses","Other Current Liability","Balance Sheet",-354000.0,0.0,4000.0,-358000.0],["2100","Accrued Payroll & Bonus","Other Current Liability","Balance Sheet",-2181556.48,926052.86,1094091.0,-2349594.62],["2200","Deferred Revenue - Current","Other Current Liability","Balance Sheet",-3277021.88,701451.39,1018599.0,-3594169.49],["2300","Sales Tax Payable","Other Current Liability","Balance Sheet",-96000.0,0.0,0.0,-96000.0],["2500","Notes Payable - Term Loan","Long Term Liability","Balance Sheet",-2500000.0,0.0,0.0,-2500000.0],["3010","Common Stock","Equity","Balance Sheet",-12000.0,0.0,0.0,-12000.0],["3020","Additional Paid-In Capital","Equity","Balance Sheet",-28400000.0,0.0,0.0,-28400000.0],["3900","Retained Earnings","Equity","Balance Sheet",24760176.34,0.0,0.0,24760176.34],["40100","Subscription Revenue","Income","Profit & Loss",-11221941.28,0.0,1192830.09,-12414771.37],["40200","Professional Services Revenue","Income","Profit & Loss",-250826.12,0.0,21239.14,-272065.26],["40300","Usage & Overage Revenue","Income","Profit & Loss",-709954.05,0.0,74137.2,-784091.25],["40900","Contra Revenue - Credits & Discounts","Income","Profit & Loss",28746.03,7188.78,0.0,35934.81],["50100","Hosting & Infrastructure","COGS","Profit & Loss",763641.29,81085.9,0.0,844727.19],["50200","Third-Party Software & Licenses","COGS","Profit & Loss",241713.75,25620.35,0.0,267334.1],["50300","Customer Support Salaries & Benefits","COGS","Profit & Loss",714882.12,65798.4,0.0,780680.52],["50400","Services Delivery Salaries & Benefits","COGS","Profit & Loss",843719.47,93508.8,0.0,937228.27],["50500","Payment Processing Fees","COGS","Profit & Loss",107992.86,13658.46,0.0,121651.32],["50600","Amortization of Capitalized Software","COGS","Profit & Loss",957184.11,102019.88,0.0,1059203.99],["60100","Sales & Marketing Salaries & Benefits","Expense","Profit & Loss",2524556.81,264684.0,0.0,2789240.81],["60110","Sales Commissions","Expense","Profit & Loss",107057.68,12527.46,0.0,119585.14],["60120","Amortization of Deferred Commissions","Expense","Profit & Loss",806614.04,78189.96,0.0,884804.0],["60200","Marketing Programs & Demand Gen","Expense","Profit & Loss",1329425.67,140911.95,0.0,1470337.62],["60210","Events & Conferences","Expense","Profit & Loss",465999.99,19000.0,0.0,484999.99],["60300","Travel & Entertainment","Expense","Profit & Loss",193370.99,20496.28,0.0,213867.27],["61100","Engineering Salaries & Benefits","Expense","Profit & Loss",3218215.3,459153.6,101013.79,3576355.11],["61200","Engineering Contractors","Expense","Profit & Loss",625900.0,59180.0,0.0,685080.0],["61300","Development Tools & Environments","Expense","Profit & Loss",316250.0,29650.0,0.0,345900.0],["62100","G&A Salaries & Benefits","Expense","Profit & Loss",1663404.0,169188.0,0.0,1832592.0],["62200","Rent & Facilities","Expense","Profit & Loss",451000.0,41000.0,0.0,492000.0],["62300","Legal & Professional Fees","Expense","Profit & Loss",242000.0,22000.0,0.0,264000.0],["62400","Insurance","Expense","Profit & Loss",154000.0,14000.0,0.0,168000.0],["62500","Bad Debt Expense","Expense","Profit & Loss",48342.76,5124.07,0.0,53466.83],["62600","Depreciation Expense","Expense","Profit & Loss",96250.0,8750.0,0.0,105000.0],["62700","Bank & Merchant Fees","Expense","Profit & Loss",35200.0,3200.0,0.0,38400.0],["62800","Corporate Software & Subscriptions","Expense","Profit & Loss",352550.0,33310.0,0.0,385860.0],["70100","Interest Income","Other Income","Profit & Loss",-134200.0,0.0,12200.0,-146400.0],["70200","Interest Expense","Other Expense","Profit & Loss",217800.0,19800.0,0.0,237600.0],["80100","Income Tax Provision","Other Expense","Profit & Loss",44000.0,4000.0,0.0,48000.0]]}]}</script>
+<script type="application/json" id="budget-data">{"file":"MeridianCloud_Budget_FY2026.xlsx","convention":"all positive; contra revenue subtracted","headerRow":5,"months":["Jan 2026","Feb 2026","Mar 2026","Apr 2026","May 2026","Jun 2026","Jul 2026","Aug 2026","Sep 2026","Oct 2026","Nov 2026","Dec 2026"],"accounts":[["40100","Subscription Revenue","Revenue",[1302512.75,1333121.8,1364450.16,1396514.74,1429332.84,1462922.16,1497300.83,1532487.4,1568500.85,1605360.62,1643086.6,1681699.13]],["40200","Professional Services Revenue","Revenue",[21424.38,21810.02,22202.6,22602.25,23009.09,23423.25,23844.87,24274.08,24711.01,25155.81,25608.61,26069.57]],["40300","Usage & Overage Revenue","Revenue",[74241.7,76023.5,77848.07,79716.42,81629.62,83588.73,85594.86,87649.13,89752.71,91906.78,94112.54,96371.24]],["40900","Contra Revenue - Credits & Discounts","Revenue",[3870.07,3928.12,3987.04,4046.84,4107.55,4169.16,4231.7,4295.17,4359.6,4425.0,4491.37,4558.74]],["50100","Hosting & Infrastructure","Cost of Revenue",[82135.54,83367.57,84618.09,85887.36,87175.67,88483.3,89810.55,91157.71,92525.08,93912.95,95321.65,96751.47]],["50200","Third-Party Software & Licenses","Cost of Revenue",[27504.34,27930.66,28363.58,28803.22,29249.67,29703.04,30163.44,30630.97,31105.75,31587.89,32077.5,32574.7]],["50300","Customer Support Salaries & Benefits","Cost of Revenue",[89417.08,90490.09,91575.97,92674.88,93786.98,94912.42,96051.37,97203.99,98370.43,99550.88,100745.49,101954.44]],["50400","Services Delivery Salaries & Benefits","Cost of Revenue",[94537.4,95577.31,96628.66,97691.57,98766.18,99852.61,100950.99,102061.45,103184.12,104319.15,105466.66,106626.79]],["50500","Payment Processing Fees","Cost of Revenue",[16305.01,16582.19,16864.09,17150.78,17442.34,17738.86,18040.42,18347.11,18659.01,18976.22,19298.81,19626.89]],["50600","Amortization of Capitalized Software","Cost of Revenue",[111542.07,112657.49,113784.06,114921.9,116071.12,117231.83,118404.15,119588.19,120784.08,121991.92,123211.84,124443.95]],["60100","Sales & Marketing Salaries & Benefits","Sales & Marketing",[275143.63,278995.64,282901.58,286862.2,290878.27,294950.57,299079.87,303266.99,307512.73,311817.91,316183.36,320609.93]],["60110","Sales Commissions","Sales & Marketing",[9484.63,9674.33,9867.81,10065.17,10266.47,10471.8,10681.24,10894.86,11112.76,11335.01,11561.71,11792.95]],["60120","Amortization of Deferred Commissions","Sales & Marketing",[81656.3,82881.14,84124.36,85386.23,86667.02,87967.03,89286.53,90625.83,91985.22,93364.99,94765.47,96186.95]],["60200","Marketing Programs & Demand Gen","Sales & Marketing",[150752.5,152561.53,154392.27,156244.97,158119.91,160017.35,161937.56,163880.81,165847.38,167837.55,169851.6,171889.82]],["60210","Events & Conferences","Sales & Marketing",[34000.0,34000.0,34000.0,34000.0,34000.0,34000.0,34000.0,34000.0,34000.0,34000.0,34000.0,34000.0]],["60300","Travel & Entertainment","Sales & Marketing",[21949.31,22234.65,22523.7,22816.51,23113.12,23413.59,23717.97,24026.3,24338.64,24655.04,24975.56,25300.24]],["61100","Engineering Salaries & Benefits","Research & Development",[362616.56,367149.26,371738.63,376385.36,381090.18,385853.81,390676.98,395560.44,400504.95,405511.26,410580.15,415712.4]],["61200","Engineering Contractors","Research & Development",[60862.88,61410.64,61963.34,62521.01,63083.7,63651.45,64224.31,64802.33,65385.55,65974.02,66567.79,67166.9]],["61300","Development Tools & Environments","Research & Development",[30340.8,30583.53,30828.19,31074.82,31323.42,31574.01,31826.6,32081.21,32337.86,32596.56,32857.34,33120.19]],["62100","G&A Salaries & Benefits","General & Administrative",[170795.29,172417.84,174055.81,175709.34,177378.58,179063.68,180764.78,182482.05,184215.63,185965.67,187732.35,189515.81]],["62200","Rent & Facilities","General & Administrative",[41164.0,41328.66,41493.97,41659.95,41826.59,41993.89,42161.87,42330.52,42499.84,42669.84,42840.52,43011.88]],["62300","Legal & Professional Fees","General & Administrative",[22000.0,22000.0,22000.0,22000.0,22000.0,22000.0,22000.0,22000.0,22000.0,22000.0,22000.0,22000.0]],["62400","Insurance","General & Administrative",[14042.0,14084.13,14126.38,14168.76,14211.26,14253.9,14296.66,14339.55,14382.57,14425.72,14468.99,14512.4]],["62500","Bad Debt Expense","General & Administrative",[5481.91,5547.69,5614.26,5681.63,5749.81,5818.81,5888.64,5959.3,6030.81,6103.18,6176.42,6250.54]],["62600","Depreciation Expense","General & Administrative",[8750.0,8750.0,8750.0,8750.0,8750.0,8750.0,8750.0,8750.0,8750.0,8750.0,8750.0,8750.0]],["62700","Bank & Merchant Fees","General & Administrative",[3200.0,3200.0,3200.0,3200.0,3200.0,3200.0,3200.0,3200.0,3200.0,3200.0,3200.0,3200.0]],["62800","Corporate Software & Subscriptions","General & Administrative",[34245.46,34553.67,34864.65,35178.43,35495.04,35814.5,36136.83,36462.06,36790.22,37121.33,37455.42,37792.52]],["70100","Interest Income","Other",[12200.0,12200.0,12200.0,12200.0,12200.0,12200.0,12200.0,12200.0,12200.0,12200.0,12200.0,12200.0]],["70200","Interest Expense","Other",[19800.0,19800.0,19800.0,19800.0,19800.0,19800.0,19800.0,19800.0,19800.0,19800.0,19800.0,19800.0]],["80100","Income Tax Provision","Other",[4000.0,4000.0,4000.0,4000.0,4000.0,4000.0,4000.0,4000.0,4000.0,4000.0,4000.0,4000.0]]],"totals":{"Total Revenue":[1394308.76,1427027.2,1460513.79,1494786.57,1529864.0,1565764.98,1602508.86,1640115.44,1678604.97,1717998.21,1758316.38,1799581.2],"Total Cost of Revenue":[421441.44,426605.31,431834.45,437129.71,442491.96,447922.06,453420.92,458989.42,464628.47,470339.01,476121.95,481978.24],"Total Sales & Marketing":[572986.37,580347.29,587809.72,595375.08,603044.79,610820.34,618703.17,626694.79,634796.73,643010.5,651337.7,659779.89],"Total Research & Development":[453820.24,459143.43,464530.16,469981.19,475497.3,481079.27,486727.89,492443.98,498228.36,504081.84,510005.28,515999.49],"Total General & Administrative":[299678.66,301881.99,304105.07,306348.11,308611.28,310894.78,313198.78,315523.48,317869.07,320235.74,322623.7,325033.15],"Budgeted Operating Income":[-353617.95,-340950.82,-327765.61,-314047.52,-299781.33,-284951.47,-269541.9,-253536.23,-236917.66,-219668.88,-201772.25,-183209.57]},"assumptions":"Base for each account is the average of actual Oct, Nov and Dec 2025, grown at a per-account monthly rate agreed in the planning round. Rent, depreciation, bank fees, events and legal fees were budgeted flat. No one-off items were budgeted."}</script>
+<script>
+(function () {
+'use strict';
+// Snapshot of the page before anything is rendered: used by "Save copy with this data".
+var PRISTINE = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+var COMPANY = document.body.getAttribute('data-company') || '';
+var C = { accent: '#1D4ED8', dim: '#60A5FA', faint: '#BFDBFE', neg: '#F59E0B', ink: '#0F172A', ink2: '#334155',
+          ink3: '#64748B', grid: '#E2E8F0', plot: '#F7FAFF', card: '#FFFFFF', axis: '#94A3B8' };
+var GID = 0;
+var MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var MFULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+// ---------------------------------------------------------------- formatting
+function isNum(v) { return typeof v === 'number' && isFinite(v); }
+function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function grp(x) { return Math.round(x).toLocaleString('en-US'); }
+function money(v, dp) {
+  if (dp === undefined) dp = 1; if (!isNum(v)) return '—';
+  var a = Math.abs(v), s = v < 0 ? '-' : '';
+  if (a >= 1e6) return s + '$' + (a / 1e6).toFixed(dp) + 'M';
+  if (a >= 1e3) return s + '$' + grp(a / 1e3) + 'K';
+  return s + '$' + grp(a);
+}
+function pct(v, dp, sign) { if (dp === undefined) dp = 1; if (!isNum(v)) return '—'; var t = (v * 100).toFixed(dp); return (sign && v >= 0 ? '+' : '') + t + '%'; }
+function pp(v, dp) { if (dp === undefined) dp = 1; if (!isNum(v)) return '—'; return (v >= 0 ? '+' : '') + (v * 100).toFixed(dp) + ' pp'; }
+function num(v) { return isNum(v) ? grp(v) : '—'; }
+function sum(a, i, j) { var s = 0; for (var k = Math.max(0, i); k < Math.min(a.length, j); k++) s += a[k]; return s; }
+function mean(a) { return a.length ? a.reduce(function (x, y) { return x + y; }, 0) / a.length : NaN; }
+function median(a) { var b = a.filter(isNum).slice().sort(function (x, y) { return x - y; }); if (!b.length) return NaN; var m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; }
+function amax(a) { return Math.max.apply(null, a.filter(isNum)); }
+function amin(a) { return Math.min.apply(null, a.filter(isNum)); }
+function fmtMo(v) { return isNum(v) ? Math.round(v) + '' : '—'; }
+
+// ---------------------------------------------------------------- columns
+// Canonical key -> accepted headings (matched case-insensitively, punctuation ignored).
+var COLS = {
+  month: ['Month', 'Period'], monthName: ['Month Name'],
+  sub: ['Subscription Revenue'], svc: ['Professional Services Revenue'], usage: ['Usage & Overage Revenue'], contra: ['Contra Revenue'],
+  rev: ['Total Revenue'], cogs: ['Cost of Revenue'], gp: ['Gross Profit'],
+  sm: ['Sales & Marketing'], rd: ['Research & Development'], ga: ['General & Administrative'], opex: ['Total Operating Expenses'],
+  opinc: ['Operating Income'], oth: ['Other Income / (Expense)', 'Other Income'], tax: ['Income Tax'], ni: ['Net Income'],
+  cashOp: ['Cash - Operating'], cashMM: ['Cash - Money Market'], cash: ['Total Cash'],
+  ar: ['Accounts Receivable'], defrev: ['Deferred Revenue'],
+  openMRR: ['Opening MRR'], newMRR: ['New MRR'], expMRR: ['Expansion MRR'], conMRR: ['Contraction MRR'], churnMRR: ['Churned MRR'],
+  mrr: ['Closing MRR'], arr: ['ARR'], cust: ['Active Customers'], newCust: ['New Customers'], churnCust: ['Churned Customers'],
+  hc: ['Headcount (FTE)', 'Headcount'],
+  allow: ['Allowance for Doubtful Accounts'], defcomm: ['Deferred Commissions'], capsw: ['Capitalised Software, net', 'Capitalized Software, net'],
+  accpay: ['Accrued Payroll & Bonus'], loan: ['Notes Payable - Term Loan', 'Term Loan'],
+  ta: ['Total Assets'], tl: ['Total Liabilities'], te: ['Total Equity (incl. YTD result)', 'Total Equity']
+};
+function norm(h) { return String(h).toLowerCase().replace(/&amp;/g, '&').replace(/[^a-z0-9&%]+/g, ' ').trim(); }
+function colName(k) { return COLS[k][0]; }
+
+// ---------------------------------------------------------------- CSV
+function parseCSV(text) {
+  var rows = [], row = [], f = '', q = false, c;
+  text = text.replace(/^﻿/, '');
+  for (var i = 0; i < text.length; i++) {
+    c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(f); f = ''; if (row.length > 1 || row[0].trim() !== '') rows.push(row); row = []; }
+    else f += c;
+  }
+  if (f !== '' || row.length) { row.push(f); if (row.length > 1 || row[0].trim() !== '') rows.push(row); }
+  return rows;
+}
+function toNum(s) {
+  s = String(s == null ? '' : s).trim(); if (s === '') return NaN;
+  var neg = /^\(.*\)$/.test(s); s = s.replace(/[()$,\s]/g, '');
+  var v; if (/%$/.test(s)) v = parseFloat(s.slice(0, -1)) / 100; else v = Number(s);
+  return neg ? -v : v;
+}
+function parseMonth(s) {
+  s = String(s).trim(); var m = s.match(/^(\d{4})[-\/](\d{1,2})/);
+  if (m) return { y: +m[1], m: +m[2] };
+  m = s.match(/^([A-Za-z]{3})[A-Za-z]*[\s\-]+(\d{2,4})$/);
+  if (m) { var mi = MN.map(function (x) { return x.toLowerCase(); }).indexOf(m[1].toLowerCase()); var y = +m[2]; if (y < 100) y += 2000; if (mi >= 0) return { y: y, m: mi + 1 }; }
+  m = s.match(/^(\d{1,2})[\/\-](\d{4})$/); if (m) return { y: +m[2], m: +m[1] };
+  return null;
+}
+
+function buildData(text, name) {
+  var rows = parseCSV(text);
+  if (rows.length < 3) throw new Error('The file needs a heading row and at least two months of data.');
+  var hdr = rows[0].map(norm), idx = {};
+  Object.keys(COLS).forEach(function (k) {
+    for (var a = 0; a < COLS[k].length; a++) { var j = hdr.indexOf(norm(COLS[k][a])); if (j >= 0) { idx[k] = j; break; } }
+  });
+  if (idx.month === undefined && idx.monthName !== undefined) idx.month = idx.monthName;
+  if (idx.month === undefined) throw new Error('No "Month" column found. The first row must hold the column headings, with one row per month below it.');
+  if (idx.rev === undefined && !(idx.sub !== undefined && idx.svc !== undefined && idx.usage !== undefined && idx.contra !== undefined))
+    throw new Error('No "Total Revenue" column found, so the cockpit cannot be built from this file.');
+  var recs = [], badRows = 0;
+  rows.slice(1).forEach(function (r) {
+    var pm = parseMonth(r[idx.month]); if (!pm) { badRows++; return; }
+    var o = { _y: pm.y, _m: pm.m };
+    Object.keys(idx).forEach(function (k) { if (k !== 'month' && k !== 'monthName') o[k] = toNum(r[idx[k]]); });
+    recs.push(o);
+  });
+  if (recs.length < 2) throw new Error('Fewer than two rows have a month the cockpit can read (expected e.g. 2026-09 or Sep 2026).');
+  recs.sort(function (a, b) { return a._y - b._y || a._m - b._m; });
+  var D = { n: recs.length, file: name, col: {}, raw: {}, derived: [], badRows: badRows };
+  D.ym = recs.map(function (r) { return r._y * 12 + r._m - 1; });
+  D.labels = recs.map(function (r) { return MN[r._m - 1] + ' ' + String(r._y).slice(2); });
+  D.months = recs.map(function (r) { return MN[r._m - 1] + ' ' + r._y; });
+  D.full = recs.map(function (r) { return MFULL[r._m - 1] + ' ' + r._y; });
+  Object.keys(idx).forEach(function (k) { if (k === 'month' || k === 'monthName') return; D.col[k] = recs.map(function (r) { return r[k]; }); D.raw[k] = true; });
+  derive(D);
+  return D;
+}
+
+function derive(D) {
+  var c = D.col, n = D.n;
+  function has() { for (var i = 0; i < arguments.length; i++) if (!c[arguments[i]]) return false; return true; }
+  function mk(k, f) { if (c[k]) return; var a = []; for (var i = 0; i < n; i++) a.push(f(i)); c[k] = a; D.derived.push(k); }
+  if (has('sub', 'svc', 'usage', 'contra')) mk('rev', function (i) { return c.sub[i] + c.svc[i] + c.usage[i] + c.contra[i]; });
+  if (has('rev', 'cogs')) mk('gp', function (i) { return c.rev[i] - c.cogs[i]; });
+  if (has('sm', 'rd', 'ga')) mk('opex', function (i) { return c.sm[i] + c.rd[i] + c.ga[i]; });
+  if (has('gp', 'opex')) mk('opinc', function (i) { return c.gp[i] - c.opex[i]; });
+  if (has('opinc', 'oth', 'tax')) mk('ni', function (i) { return c.opinc[i] + c.oth[i] - c.tax[i]; });
+  if (has('cashOp', 'cashMM')) mk('cash', function (i) { return c.cashOp[i] + c.cashMM[i]; });
+  if (has('mrr')) { mk('arr', function (i) { return 12 * c.mrr[i]; }); mk('openMRR', function (i) { return i ? c.mrr[i - 1] : NaN; }); }
+  // ratios (always computed here so the file never needs to carry them)
+  if (has('rev', 'gp')) c.gm = c.gp.map(function (v, i) { return v / c.rev[i]; });
+  if (has('rev', 'opinc')) c.om = c.opinc.map(function (v, i) { return v / c.rev[i]; });
+  if (has('rev', 'ni')) c.nm = c.ni.map(function (v, i) { return v / c.rev[i]; });
+  if (has('rev', 'cogs')) c.cogsPct = c.cogs.map(function (v, i) { return v / c.rev[i]; });
+  if (has('mrr', 'cust')) c.arpa = c.mrr.map(function (v, i) { return v / c.cust[i]; });
+  if (has('churnCust', 'cust')) c.logoChurn = c.churnCust.map(function (v, i) { var base = i ? c.cust[i - 1] : (c.newCust ? c.cust[0] - c.newCust[0] + v : c.cust[0]); return v / base; });
+  if (has('churnMRR', 'openMRR')) c.revChurn = c.churnMRR.map(function (v, i) { return -v / c.openMRR[i]; });
+  if (has('mrr', 'openMRR')) c.netg = c.mrr.map(function (v, i) { return v / c.openMRR[i] - 1; });
+  if (has('rev', 'hc')) c.rpf = c.rev.map(function (v, i) { return 12 * v / c.hc[i]; });
+  if (has('ar', 'rev')) c.dso = c.ar.map(function (v, i) { return v / c.rev[i] * 30; });
+}
+
+// ---------------------------------------------------------------- data checks
+function runChecks(D) {
+  var c = D.col, n = D.n, L = D.months, out = [];
+  function raw() { for (var i = 0; i < arguments.length; i++) if (!D.raw[arguments[i]]) return false; return true; }
+  function tie(name, ok, diffAt, tol, describe) {
+    if (!ok) return; var bad = [];
+    for (var i = 0; i < n; i++) { var d = diffAt(i); if (isNum(d) && Math.abs(d) > tol) bad.push(i); }
+    out.push({ name: name, ok: !bad.length, detail: bad.length ? (bad.length > 1 ? bad.length + ' months off. First: ' : '') + describe(bad[0]) : '' });
+  }
+  // completeness
+  var gaps = [], dupes = [];
+  for (var i = 1; i < n; i++) { var d = D.ym[i] - D.ym[i - 1]; if (d === 0) dupes.push(L[i]); else if (d > 1) gaps.push(L[i - 1] + ' → ' + L[i]); }
+  out.push({ name: 'Months are consecutive, with no gaps or duplicates', ok: !gaps.length && !dupes.length,
+             detail: (gaps.length ? 'Gap: ' + gaps.join(', ') + '. ' : '') + (dupes.length ? 'Duplicate: ' + dupes.join(', ') + '.' : '') });
+  var blanks = [];
+  Object.keys(D.raw).forEach(function (k) { c[k].forEach(function (v, i) { if (!isNum(v)) blanks.push(colName(k) + ' (' + L[i] + ')'); }); });
+  out.push({ name: 'No blank or unreadable values', ok: !blanks.length && !D.badRows,
+             detail: (blanks.length ? blanks.slice(0, 4).join(', ') + (blanks.length > 4 ? ' and ' + (blanks.length - 4) + ' more' : '') + '. ' : '') + (D.badRows ? D.badRows + ' row(s) skipped: month not recognised.' : '') });
+  function moneyDesc(lbl, rep, exp) { return function (i) { return L[i] + ': ' + lbl + ' ' + money(rep(i), 2) + ', expected ' + money(exp(i), 2); }; }
+  tie('Total revenue = sum of revenue streams', raw('rev', 'sub', 'svc', 'usage', 'contra'),
+      function (i) { return c.rev[i] - (c.sub[i] + c.svc[i] + c.usage[i] + c.contra[i]); }, 1,
+      moneyDesc('reported', function (i) { return c.rev[i]; }, function (i) { return c.sub[i] + c.svc[i] + c.usage[i] + c.contra[i]; }));
+  tie('Gross profit = revenue − cost of revenue', raw('gp', 'rev', 'cogs'), function (i) { return c.gp[i] - (c.rev[i] - c.cogs[i]); }, 1,
+      moneyDesc('reported', function (i) { return c.gp[i]; }, function (i) { return c.rev[i] - c.cogs[i]; }));
+  tie('Total opex = S&M + R&D + G&A', raw('opex', 'sm', 'rd', 'ga'), function (i) { return c.opex[i] - (c.sm[i] + c.rd[i] + c.ga[i]); }, 1,
+      moneyDesc('reported', function (i) { return c.opex[i]; }, function (i) { return c.sm[i] + c.rd[i] + c.ga[i]; }));
+  tie('Operating income = gross profit − opex', raw('opinc', 'gp', 'opex'), function (i) { return c.opinc[i] - (c.gp[i] - c.opex[i]); }, 1,
+      moneyDesc('reported', function (i) { return c.opinc[i]; }, function (i) { return c.gp[i] - c.opex[i]; }));
+  tie('Net income = operating income + other − tax', raw('ni', 'opinc', 'oth', 'tax'), function (i) { return c.ni[i] - (c.opinc[i] + c.oth[i] - c.tax[i]); }, 1,
+      moneyDesc('reported', function (i) { return c.ni[i]; }, function (i) { return c.opinc[i] + c.oth[i] - c.tax[i]; }));
+  tie('Total cash = operating + money market', raw('cash', 'cashOp', 'cashMM'), function (i) { return c.cash[i] - (c.cashOp[i] + c.cashMM[i]); }, 1,
+      moneyDesc('reported', function (i) { return c.cash[i]; }, function (i) { return c.cashOp[i] + c.cashMM[i]; }));
+  function bridge(i) { return c.openMRR[i] + c.newMRR[i] + c.expMRR[i] + c.conMRR[i] + c.churnMRR[i]; }
+  tie('MRR bridge ties (opening + movements = closing)', raw('openMRR', 'newMRR', 'expMRR', 'conMRR', 'churnMRR', 'mrr'),
+      function (i) { return c.mrr[i] - bridge(i); }, 0.5, moneyDesc('closing', function (i) { return c.mrr[i]; }, bridge));
+  tie('Opening MRR = prior month closing', raw('openMRR', 'mrr'), function (i) { return i ? c.openMRR[i] - c.mrr[i - 1] : NaN; }, 0.5,
+      moneyDesc('opening', function (i) { return c.openMRR[i]; }, function (i) { return c.mrr[i - 1]; }));
+  tie('Subscription revenue = closing MRR', raw('sub', 'mrr'), function (i) { return c.sub[i] - c.mrr[i]; }, 0.5,
+      moneyDesc('subscription revenue', function (i) { return c.sub[i]; }, function (i) { return c.mrr[i]; }));
+  tie('ARR = 12 × closing MRR', raw('arr', 'mrr'), function (i) { return c.arr[i] - 12 * c.mrr[i]; }, 1,
+      moneyDesc('ARR', function (i) { return c.arr[i]; }, function (i) { return 12 * c.mrr[i]; }));
+  tie('Customer count rolls forward (prior + new − churned)', raw('cust', 'newCust', 'churnCust'),
+      function (i) { return i ? c.cust[i] - (c.cust[i - 1] + c.newCust[i] - c.churnCust[i]) : NaN; }, 0.5,
+      function (i) { return L[i] + ': ' + num(c.cust[i]) + ' reported, ' + num(c.cust[i - 1] + c.newCust[i] - c.churnCust[i]) + ' expected (' + num(c.cust[i - 1]) + ' + ' + num(c.newCust[i]) + ' new − ' + num(c.churnCust[i]) + ' churned)'; });
+  tie('Balance sheet balances (assets = liabilities + equity)', raw('ta', 'tl', 'te'), function (i) { return c.ta[i] - c.tl[i] - c.te[i]; }, 1,
+      function (i) { return L[i] + ': out by ' + money(c.ta[i] - c.tl[i] - c.te[i], 2); });
+  return out;
+}
+
+// ---------------------------------------------------------------- chart helpers
+function scaleR(vals, lo, hi, pad) {
+  if (pad === undefined) pad = 0.08; var v = vals.filter(isNum);
+  var a = lo != null ? lo : amin(v), b = hi != null ? hi : amax(v); if (a === b) { a -= 1; b += 1; }
+  var s = b - a; return [a - s * pad, b + s * pad];
+}
+function niceTicks(lo, hi, n) {
+  n = n || 4; var raw = (hi - lo) / n, mag = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / mag;
+  var step = (r < 1.5 ? 1 : r < 3.5 ? 2 : r < 7.5 ? 5 : 10) * mag, out = [];
+  for (var t = Math.ceil(lo / step) * step; t <= hi + step * 0.01; t += step) out.push(Math.abs(t) < 1e-9 ? 0 : +t.toFixed(10));
+  return out;
+}
+function f1(x) { return x.toFixed(1); }
+function pathD(pts) { return pts.filter(function (p) { return isNum(p[1]); }).map(function (p, i) { return (i ? 'L' : 'M') + f1(p[0]) + ',' + f1(p[1]); }).join(' '); }
+
+function sparkline(vals, color) {
+  color = color || C.accent; var w = 120, h = 32, r = scaleR(vals, null, null, 0.1), lo = r[0], hi = r[1], n = vals.length;
+  var pts = vals.map(function (v, i) { return [i * (w - 4) / (n - 1) + 2, h - 2 - (v - lo) / (hi - lo) * (h - 4)]; });
+  var z = '';
+  if (lo < 0 && hi > 0) { var zy = h - 2 - (0 - lo) / (hi - lo) * (h - 4); z = '<line x1="2" y1="' + f1(zy) + '" x2="' + (w - 2) + '" y2="' + f1(zy) + '" stroke="' + C.ink3 + '" stroke-width="1" stroke-dasharray="2,2"/>'; }
+  var l = pts[pts.length - 1];
+  return '<svg class="spark" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '" aria-hidden="true">' + z +
+    '<path d="' + pathD(pts) + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
+    '<circle cx="' + f1(l[0]) + '" cy="' + f1(l[1]) + '" r="2.5" fill="' + color + '"/></svg>';
+}
+
+function axisLabel(o, t) { return o.axisFmt ? o.axisFmt(t) : (o.pctAxis ? pct(t, 0) : money(t, 1)); }
+
+function lineChart(series, labels, o) {
+  o = Object.assign({ w: 560, h: 220, fmt: money, title: '', ylo: null, yhi: null, annotations: [], zeroLine: true, pctAxis: false, directLabel: true, axisFmt: null, annotY: 0 }, o || {});
+  var dl = o.directLabel && series.length <= 4, ml = 52, mr = dl ? 118 : 16, mt = 14, mb = 26, w = o.w, h = o.h, pw = w - ml - mr, ph = h - mt - mb;
+  var all = []; series.forEach(function (s) { s.vals.forEach(function (v) { if (isNum(v)) all.push(v); }); });
+  var r = scaleR(all, o.ylo, o.yhi), lo = r[0], hi = r[1]; if (o.zeroLine && lo > 0) lo = 0;
+  var n = labels.length; function X(i) { return ml + i * pw / (n - 1); } function Y(v) { return mt + ph - (v - lo) / (hi - lo) * ph; }
+  var out = ['<svg class="chart lc" viewBox="0 0 ' + w + ' ' + h + '" width="100%" role="img" aria-label="' + esc(o.title) + '">',
+             '<rect x="' + ml + '" y="' + mt + '" width="' + pw + '" height="' + ph + '" fill="' + C.plot + '" rx="3"/>'];
+  niceTicks(lo, hi).forEach(function (t) {
+    var y = Y(t); out.push('<line x1="' + ml + '" y1="' + f1(y) + '" x2="' + (w - mr) + '" y2="' + f1(y) + '" stroke="' + C.grid + '" stroke-width="1"/>');
+    out.push('<text x="' + (ml - 6) + '" y="' + f1(y + 3.5) + '" text-anchor="end" class="tick">' + axisLabel(o, t) + '</text>');
+  });
+  if (lo < 0 && hi > 0) out.push('<line x1="' + ml + '" y1="' + f1(Y(0)) + '" x2="' + (w - mr) + '" y2="' + f1(Y(0)) + '" stroke="' + C.axis + '" stroke-width="1.25"/>');
+  var step = Math.max(1, Math.ceil(n / Math.max(2, Math.floor(pw / 64))));
+  for (var i = 0; i < n; i += step) out.push('<text x="' + f1(X(i)) + '" y="' + (h - 8) + '" text-anchor="middle" class="tick">' + esc(labels[i]) + '</text>');
+  o.annotations.forEach(function (a, k) {
+    var ai = a[0], txt = a[1], lvl = a.length > 2 ? a[2] : k, x = X(ai);
+    out.push('<line x1="' + f1(x) + '" y1="' + mt + '" x2="' + f1(x) + '" y2="' + (mt + ph) + '" stroke="' + C.neg + '" stroke-width="1" stroke-dasharray="3,3"/>');
+    var anchor = ai > n * 0.6 ? 'end' : 'start', dx = anchor === 'end' ? -4 : 4;
+    out.push('<text x="' + f1(x + dx) + '" y="' + f1(mt + 10 + ph * o.annotY + lvl * 13) + '" text-anchor="' + anchor + '" class="annot">' + esc(txt) + '</text>');
+  });
+  var ends = [];
+  series.forEach(function (s, si) {
+    var pts = s.vals.map(function (v, i) { return [X(i), Y(v)]; });
+    if (si === 0 && (o.area === true || (o.area !== false && series.length === 1))) {
+      var gid = 'g' + (++GID), base = Y(lo < 0 && hi > 0 ? 0 : lo), good = pts.filter(function (p) { return isNum(p[1]); });
+      out.push('<defs><linearGradient id="' + gid + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + s.color + '" stop-opacity=".22"/><stop offset="1" stop-color="' + s.color + '" stop-opacity="0"/></linearGradient></defs>');
+      out.push('<path d="' + pathD(good) + ' L' + f1(good[good.length - 1][0]) + ',' + f1(base) + ' L' + f1(good[0][0]) + ',' + f1(base) + ' Z" fill="url(#' + gid + ')" stroke="none"/>');
+    }
+    out.push('<path d="' + pathD(pts) + '" fill="none" stroke="' + s.color + '" stroke-width="' + (si === 0 ? 2.75 : 2.25) + '" stroke-linejoin="round" stroke-linecap="round"' + (s.dash ? ' stroke-dasharray="' + s.dash + '"' : '') + '/>');
+    var l = pts[pts.length - 1];
+    out.push('<circle cx="' + f1(l[0]) + '" cy="' + f1(l[1]) + '" r="5" fill="' + s.color + '" stroke="' + C.card + '" stroke-width="2.5"/>');
+    ends.push([l[0], l[1] + 4, s.name, o.fmt(s.vals[s.vals.length - 1])]);
+  });
+  if (dl) {
+    ends.sort(function (a, b) { return a[1] - b[1]; });
+    for (var k = 1; k < ends.length; k++) if (ends[k][1] - ends[k - 1][1] < 26) ends[k][1] = ends[k - 1][1] + 26;
+    ends.forEach(function (e) {
+      out.push('<text x="' + f1(e[0] + 9) + '" y="' + f1(e[1] - 6) + '" class="dlabel" style="fill:' + C.ink3 + '">' + esc(e[2]) + '</text><text x="' + f1(e[0] + 9) + '" y="' + f1(e[1] + 7) + '" class="dlabel">' + esc(e[3]) + '</text>');
+    });
+  }
+  out.push('<g class="hover"><line class="xh" x1="0" y1="' + mt + '" x2="0" y2="' + (mt + ph) + '" stroke="' + C.ink2 + '" stroke-width="1" style="display:none"/>');
+  for (var j = 0; j < n; j++) {
+    var x0 = Math.max(ml, ml + (j - 0.5) * pw / (n - 1)), x1 = Math.min(w - mr, ml + (j + 0.5) * pw / (n - 1));
+    var tip = labels[j] + ' · ' + series.map(function (s) { return s.name + ' ' + o.fmt(s.vals[j]); }).join(' · ');
+    out.push('<rect x="' + f1(x0) + '" y="' + mt + '" width="' + f1(x1 - x0) + '" height="' + ph + '" fill="transparent" data-x="' + f1(X(j)) + '" data-tip="' + esc(tip) + '"/>');
+  }
+  out.push('</g></svg>');
+  return out.join('');
+}
+
+function barChart(vals, labels, o) {
+  o = Object.assign({ w: 560, h: 220, fmt: money, title: '', color: C.accent, negColor: C.neg, stacked: null, pctAxis: false, axisFmt: null }, o || {});
+  var ml = 52, mr = 16, mt = 14, mb = 26, w = o.w, h = o.h, pw = w - ml - mr, ph = h - mt - mb, n = labels.length, tops = [], bots = [], all;
+  if (o.stacked) {
+    for (var i = 0; i < n; i++) { var t = 0, b = 0; o.stacked.forEach(function (s) { var v = s.vals[i]; if (v >= 0) t += v; else b += v; }); tops.push(t); bots.push(b); }
+    all = tops.concat(bots);
+  } else all = vals.concat([0]);
+  var r = scaleR(all, null, null, 0.1), lo = Math.min(r[0], 0), hi = r[1];
+  function Y(v) { return mt + ph - (v - lo) / (hi - lo) * ph; }
+  var slot = pw / n, bw = slot * 0.62;
+  var out = ['<svg class="chart bc" viewBox="0 0 ' + w + ' ' + h + '" width="100%" role="img" aria-label="' + esc(o.title) + '">',
+             '<rect x="' + ml + '" y="' + mt + '" width="' + pw + '" height="' + ph + '" fill="' + C.plot + '" rx="3"/>'];
+  niceTicks(lo, hi).forEach(function (t) {
+    var y = Y(t); out.push('<line x1="' + ml + '" y1="' + f1(y) + '" x2="' + (w - mr) + '" y2="' + f1(y) + '" stroke="' + C.grid + '"/>');
+    out.push('<text x="' + (ml - 6) + '" y="' + f1(y + 3.5) + '" text-anchor="end" class="tick">' + axisLabel(o, t) + '</text>');
+  });
+  out.push('<line x1="' + ml + '" y1="' + f1(Y(0)) + '" x2="' + (w - mr) + '" y2="' + f1(Y(0)) + '" stroke="' + C.ink3 + '"/>');
+  var step = Math.max(1, Math.ceil(n / Math.max(2, Math.floor(pw / 64))));
+  for (var k = 0; k < n; k += step) out.push('<text x="' + f1(ml + slot * (k + 0.5)) + '" y="' + (h - 8) + '" text-anchor="middle" class="tick">' + esc(labels[k]) + '</text>');
+  for (var j = 0; j < n; j++) {
+    var x = ml + slot * j + (slot - bw) / 2, tip;
+    if (o.stacked) {
+      var up = 0, dn = 0, parts = [];
+      o.stacked.forEach(function (s) {
+        var v = s.vals[j], y0, y1;
+        if (v >= 0) { y0 = Y(up + v); y1 = Y(up); up += v; } else { y0 = Y(dn); y1 = Y(dn + v); dn += v; }
+        out.push('<rect x="' + f1(x) + '" y="' + f1(y0) + '" width="' + f1(bw) + '" height="' + f1(Math.max(0, y1 - y0 - 2)) + '" fill="' + s.color + '" rx="1"/>');
+        parts.push(s.name + ' ' + o.fmt(v));
+      });
+      tip = labels[j] + ' · ' + parts.join(' · ') + ' · Total ' + o.fmt(tops[j] + bots[j]);
+    } else {
+      var v = vals[j], col = v < 0 ? o.negColor : o.color, ya = v >= 0 ? Y(v) : Y(0), yb = v >= 0 ? Y(0) : Y(v);
+      out.push('<rect x="' + f1(x) + '" y="' + f1(ya) + '" width="' + f1(bw) + '" height="' + f1(Math.max(0.5, yb - ya)) + '" fill="' + col + '" rx="2"/>');
+      tip = labels[j] + ' · ' + o.fmt(v);
+    }
+    out.push('<rect x="' + f1(ml + slot * j) + '" y="' + mt + '" width="' + f1(slot) + '" height="' + ph + '" fill="transparent" data-x="' + f1(ml + slot * (j + 0.5)) + '" data-tip="' + esc(tip) + '"/>');
+  }
+  out.push('</svg>');
+  return out.join('');
+}
+
+function waterfall(steps, o) {
+  o = Object.assign({ w: 560, h: 240, fmt: money, title: '' }, o || {});
+  var ml = 56, mr = 16, mt = 18, mb = 40, w = o.w, h = o.h, pw = w - ml - mr, ph = h - mt - mb, n = steps.length, run = 0, lv = [];
+  steps.forEach(function (s) { if (s[2] === 'total') { lv.push([0, s[1]]); run = s[1]; } else { lv.push([run, run + s[1]]); run += s[1]; } });
+  var all = []; lv.forEach(function (p) { all.push(p[0], p[1]); });
+  var r = scaleR(all, null, null, 0.06), lo = Math.min(r[0], 0), hi = r[1];
+  function Y(v) { return mt + ph - (v - lo) / (hi - lo) * ph; }
+  var slot = pw / n, bw = slot * 0.66, prev = null;
+  var out = ['<svg class="chart bc" viewBox="0 0 ' + w + ' ' + h + '" width="100%" role="img" aria-label="' + esc(o.title) + '">',
+             '<rect x="' + ml + '" y="' + mt + '" width="' + pw + '" height="' + ph + '" fill="' + C.plot + '" rx="3"/>'];
+  niceTicks(lo, hi).forEach(function (t) {
+    out.push('<line x1="' + ml + '" y1="' + f1(Y(t)) + '" x2="' + (w - mr) + '" y2="' + f1(Y(t)) + '" stroke="' + C.grid + '"/>');
+    out.push('<text x="' + (ml - 6) + '" y="' + f1(Y(t) + 3.5) + '" text-anchor="end" class="tick">' + money(t, 1) + '</text>');
+  });
+  steps.forEach(function (s, i) {
+    var a = lv[i][0], b = lv[i][1], x = ml + slot * i + (slot - bw) / 2;
+    var col = s[2] === 'total' ? (s[3] || C.accent) : (s[1] >= 0 ? C.dim : C.neg), y0 = Y(Math.max(a, b)), y1 = Y(Math.min(a, b));
+    out.push('<rect x="' + f1(x) + '" y="' + f1(y0) + '" width="' + f1(bw) + '" height="' + f1(Math.max(1, y1 - y0)) + '" fill="' + col + '" rx="2"/>');
+    if (prev !== null) out.push('<line x1="' + f1(x - (slot - bw) / 2) + '" y1="' + f1(Y(prev)) + '" x2="' + f1(x) + '" y2="' + f1(Y(prev)) + '" stroke="' + C.ink3 + '" stroke-dasharray="2,2"/>');
+    prev = b;
+    var vl = s[2] === 'delta' ? (o.dfmt || o.fmt)(s[1]) : o.fmt(b);
+    out.push('<text x="' + f1(x + bw / 2) + '" y="' + f1(y0 - 5) + '" text-anchor="middle" class="dlabel">' + vl + '</text>');
+    out.push('<text x="' + f1(x + bw / 2) + '" y="' + (h - 20) + '" text-anchor="middle" class="tick">' + esc(s[0]) + '</text>');
+    out.push('<rect x="' + f1(ml + slot * i) + '" y="' + mt + '" width="' + f1(slot) + '" height="' + ph + '" fill="transparent" data-x="' + f1(ml + slot * (i + 0.5)) + '" data-tip="' + esc(s[0] + ' · ' + vl) + '"/>');
+  });
+  out.push('</svg>');
+  return out.join('');
+}
+
+function legend(items) { return '<div class="legend">' + items.map(function (it) { return '<span><i style="background:' + it[1] + '"></i>' + esc(it[0]) + '</span>'; }).join('') + '</div>'; }
+function tile(label, value, delta, good, spark, note) {
+  var cls = good === null || good === undefined ? '' : (good ? 'good' : 'bad');
+  return '<div class="tile"><div class="label">' + esc(label) + '</div><div class="value">' + esc(value) + '</div>' +
+    (delta ? '<div class="delta ' + cls + '">' + esc(delta) + '</div>' : '') + (spark || '') + (note ? '<div class="note">' + esc(note) + '</div>' : '') + '</div>';
+}
+function tileC(label, value, rows, spark, note) {
+  var cmp = '<div class="cmp">' + rows.map(function (r) {
+    var cl = r.na ? 'na' : (r.good === null || r.good === undefined ? '' : (r.good ? 'good' : 'bad'));
+    return '<span class="k">' + esc(r.k) + '</span><span class="v ' + cl + '">' + esc(r.v) + (r.tag ? '<span class="tag">' + esc(r.tag) + '</span>' : '') + '</span>';
+  }).join('') + '</div>';
+  return '<div class="tile"><div class="label">' + esc(label) + '</div><div class="value">' + esc(value) + '</div>' + cmp + (spark || '') + (note ? '<div class="note">' + esc(note) + '</div>' : '') + '</div>';
+}
+function card(title, body, o) {
+  o = o || {};
+  return '<section class="card span' + (o.span || 6) + '"' + (o.style ? ' style="' + o.style + '"' : '') + '><h3>' + esc(title) + '</h3>' +
+    (o.sub ? '<div class="sub">' + esc(o.sub) + '</div>' : '') + body + (o.foot ? '<div class="foot">' + o.foot + '</div>' : '') + '</section>';
+}
+function missingCard(title, D, keys, span) {
+  var miss = keys.filter(function (k) { return !D.col[k]; }).map(colName);
+  return card(title, '<div class="missing">Not in this data file: <b>' + esc(miss.join(', ')) + '</b>. Add ' + (miss.length > 1 ? 'these columns' : 'this column') +
+    ' to the monthly export to show this view.</div>', { span: span || 6 });
+}
+function cls(good, d) { return !isNum(d) || Math.abs(d) < 1e-9 ? '' : (good ? 'pos' : 'neg'); }
+
+// Months that stand out against their neighbours (centred 5-month median, robust z > 4, above a materiality floor).
+function spikes(vals, minAbs) {
+  var n = vals.length, res = [];
+  for (var i = 2; i < n - 2; i++) res.push({ i: i, r: vals[i] - median(vals.slice(i - 2, i + 3)) });
+  var mad = median(res.map(function (o) { return Math.abs(o.r); })) || 1e-9;
+  return res.map(function (o) { o.z = o.r / (1.4826 * mad); return o; }).filter(function (o) { return Math.abs(o.z) > 4 && Math.abs(o.r) >= minAbs; });
+}
+
+// ---------------------------------------------------------------- shared metrics
+function metrics(D) {
+  var c = D.col, n = D.n, CUR = n - 1, YOY = n - 13, m = { CUR: CUR, PRI: n - 2, YOY: YOY, hasYoY: YOY >= 0 };
+  m.g = m.hasYoY ? c.rev[CUR] / c.rev[YOY] - 1 : NaN;
+  m.ttmRev = sum(c.rev, n - 12, n); m.ttmRevPrior = n >= 24 ? sum(c.rev, n - 24, n - 12) : NaN;
+  if (c.ni) { m.ttmNi = sum(c.ni, n - 12, n); m.ttmNiPrior = n >= 24 ? sum(c.ni, n - 24, n - 12) : NaN; m.lossRate = -mean(c.ni.slice(-6)); }
+  if (c.cash && m.hasYoY) {
+    m.burn12 = c.cash[CUR] - c.cash[YOY]; m.burnRate = -m.burn12 / 12;
+    m.runwayCash = m.burnRate > 0 ? c.cash[CUR] / m.burnRate : Infinity;
+    m.runwayLoss = m.lossRate > 0 ? c.cash[CUR] / m.lossRate : Infinity;
+    var p0 = YOY - 12 >= 0 ? YOY - 12 : 0, span = YOY - p0;
+    if (span > 0) { var bp = -(c.cash[YOY] - c.cash[p0]) / span; m.runwayCashPrior = bp > 0 ? c.cash[YOY] / bp : Infinity; }
+    if (c.ni && YOY >= 5) { var lp = -mean(c.ni.slice(YOY - 5, YOY + 1)); m.runwayLossPrior = lp > 0 ? c.cash[YOY] / lp : Infinity; }
+  }
+  if (c.om && m.hasYoY) {
+    m.rule40 = m.g + c.om[CUR];
+    if (YOY - 12 >= 0) { m.rule40Prior = c.rev[YOY] / c.rev[YOY - 12] - 1 + c.om[YOY]; m.rule40Est = false; }
+    else if (YOY > 0) { m.rule40Prior = Math.pow(c.rev[YOY] / c.rev[0], 12 / YOY) - 1 + c.om[YOY]; m.rule40Est = true; }
+  }
+  // churn spike in the last 12 months
+  if (c.churnMRR) {
+    var last = c.churnMRR.slice(-12).map(Math.abs), mx = amax(last), k = last.indexOf(mx), md = median(last);
+    if (mx > 3 * md && mx > 0) { m.churnSpike = n - 12 + k; }
+  }
+  // step change in cost of revenue (% of revenue): last 4 months vs the 8 before
+  if (c.cogsPct && n >= 12) {
+    var a = mean(c.cogsPct.slice(-4)), b = mean(c.cogsPct.slice(-12, -4));
+    if (Math.abs(a - b) > 0.02) m.cogsStep = { now: a, before: b, from: D.months[n - 4] };
+  }
+  return m;
+}
+function runwayTxt(v) { return v === Infinity ? 'n/a' : fmtMo(v); }
+
+// ---------------------------------------------------------------- sections
+function sOverview(D, M, checks) {
+  var c = D.col, L = D.labels, Mo = D.months, n = D.n, CUR = M.CUR, PRI = M.PRI, YOY = M.YOY;
+  function l12(a) { return a.slice(-12); }
+  function yoyPct(a) { return M.hasYoY ? pct(a[CUR] / a[YOY] - 1, 1, true) + ' YoY' : ''; }
+  // Every tile: the same three comparisons, in the same order.
+  var kM = 'vs ' + L[PRI], kY = 'vs ' + L[YOY], curM = Mo[CUR], hasB = BUDGET && !BUDGET.error && BUDGET.months.indexOf(curM) >= 0;
+  function rPct(a, i) { var d = a[CUR] / a[i] - 1; return { v: pct(d, 1, true), good: d >= 0 }; }
+  function rPP(a, i) { var d = a[CUR] - a[i]; return { v: pp(d), good: d >= 0 }; }
+  function rAmt(a, i) { var d = a[CUR] - a[i]; return { v: smoney(d, 2), good: d >= 0 }; }
+  function rNum(a, i) { var d = a[CUR] - a[i]; return { v: (d >= 0 ? '+' : '') + num(d) + ' (' + pct(d / a[i], 1, true) + ')', good: d >= 0 }; }
+  function three(mo, yo, bu) { mo.k = kM; yo.k = kY; bu = bu || { v: 'not budgeted', na: true }; bu.k = 'vs Budget'; return [mo, yo, bu]; }
+  function bRev() { var b = bLine('rev', curM), d = c.rev[CUR] / b - 1; return { v: pct(d, 1, true), good: d >= 0, tag: d >= 0 ? 'fav' : 'unfav' }; }
+  function bMargin(arr, num_) { var b = num_ / bLine('rev', curM), d = arr[CUR] - b; return { v: pp(d), good: d >= 0, tag: d >= 0 ? 'fav' : 'unfav' }; }
+  function l12(a) { return a.slice(-12); }
+  var t = [];
+  t.push(c.arr ? tileC('ARR', money(c.arr[CUR]), three(rPct(c.arr, PRI), rPct(c.arr, YOY)), sparkline(l12(c.arr))) : tile('ARR', '—', '', null, '', 'Not in file'));
+  t.push(tileC('Revenue (month)', money(c.rev[CUR], 2), three(rPct(c.rev, PRI), rPct(c.rev, YOY), hasB ? bRev() : null), sparkline(l12(c.rev))));
+  t.push(c.gm ? tileC('Gross margin', pct(c.gm[CUR]), three(rPP(c.gm, PRI), rPP(c.gm, YOY), hasB ? bMargin(c.gm, bLine('gp', curM)) : null), sparkline(l12(c.gm))) : tile('Gross margin', '—', '', null, '', 'Not in file'));
+  t.push(c.om ? tileC('Operating margin', pct(c.om[CUR]), three(rPP(c.om, PRI), rPP(c.om, YOY), hasB ? bMargin(c.om, bLine('opinc', curM)) : null), sparkline(l12(c.om)), c.om[CUR] < 0 ? 'Still loss-making' : '') : tile('Operating margin', '—', '', null, '', 'Not in file'));
+  if (c.cash) {
+    var note = M.runwayCash === Infinity && M.runwayLoss === Infinity ? 'Cash not falling' :
+      'Runway ' + runwayTxt(Math.min(M.runwayLoss, M.runwayCash)) + '–' + runwayTxt(Math.max(M.runwayLoss, M.runwayCash)) + ' mo (net loss vs cash burn)';
+    t.push(tileC('Net cash', money(c.cash[CUR], 2), three(rAmt(c.cash, PRI), rAmt(c.cash, YOY)), sparkline(l12(c.cash)), note));
+  } else t.push(tile('Net cash', '—', '', null, '', 'Not in file'));
+  t.push(c.cust ? tileC('Customers', num(c.cust[CUR]), three(rNum(c.cust, PRI), rNum(c.cust, YOY)), sparkline(l12(c.cust)), c.arpa ? 'ARPA $' + grp(c.arpa[CUR]) + '/mo' : '') : tile('Customers', '—', '', null, '', 'Not in file'));
+  var tileKey = '<div class="tilekey"><span><b>Every tile compares the same three ways:</b> vs last month (' + esc(L[PRI]) + '), vs the same month last year (' + esc(L[YOY]) + '), and vs budget where the budget has that line.</span><span>Blue = better, amber = worse. Fav / unfav = favorable / unfavorable to budget.</span></div>';
+  var revBody, revSub = '';
+  if (c.sub && c.usage && c.svc && c.contra) {
+    revBody = legend([['Subscription', C.accent], ['Usage & overage', C.dim], ['Services', C.faint], ['Contra revenue', C.neg]]) +
+      barChart(null, L, { w: 760, h: 300, title: 'Monthly revenue by stream', stacked: [
+        { name: 'Subscription', vals: c.sub, color: C.accent }, { name: 'Usage & overage', vals: c.usage, color: C.dim },
+        { name: 'Services', vals: c.svc, color: C.faint }, { name: 'Contra', vals: c.contra, color: C.neg }] });
+    revSub = 'Subscription is ' + pct(c.sub[CUR] / c.rev[CUR], 0) + ' of revenue';
+  } else revBody = barChart(c.rev, L, { w: 760, h: 240, title: 'Monthly revenue' });
+  if (isNum(M.ttmRevPrior)) revSub += (revSub ? '; ' : '') + 'TTM revenue ' + money(M.ttmRev) + ' vs ' + money(M.ttmRevPrior) + ' prior year (' + pct(M.ttmRev / M.ttmRevPrior - 1, 1, true) + ')';
+  var revCard = card('Revenue by stream', revBody, { sub: revSub, span: 8, foot: 'Contra revenue (credits) shown below the axis.' + (D.raw.sub && D.raw.mrr ? ' Subscription revenue equals closing MRR.' : '') });
+
+  // scorecard
+  var sc = '<div class="stats">';
+  if (isNum(M.rule40)) {
+    var d40 = M.rule40 - M.rule40Prior;
+    sc += '<div class="stat"><div class="v">' + pct(M.rule40, 0) + '</div><div class="l">Rule of 40 (' + pct(M.g, 0) + ' growth ' + (c.om[CUR] >= 0 ? '+ ' : '− ') + pct(Math.abs(c.om[CUR]), 0) + ' margin)</div>' +
+      (isNum(d40) ? '<div class="l ' + (d40 >= 0 ? 'good' : 'bad') + '">' + pp(d40, 1) + ' vs ' + L[YOY] + (M.rule40Est ? ' (est.)' : '') + '</div>' : '') + '</div>';
+  }
+  if (c.ni) {
+    var dl = M.ttmNi - M.ttmNiPrior, isLoss = M.ttmNi < 0;
+    sc += '<div class="stat"><div class="v">' + money(Math.abs(M.ttmNi)) + '</div><div class="l">TTM net ' + (isLoss ? 'loss' : 'income') + '</div>' +
+      (isNum(dl) ? '<div class="l ' + (dl >= 0 ? 'good' : 'bad') + '">' + (isLoss ? 'Loss ' + (dl < 0 ? 'up ' : 'down ') : 'Income ' + (dl >= 0 ? 'up ' : 'down ')) + money(Math.abs(dl), 2) + ' vs prior 12 mo</div>' : '') + '</div>';
+  }
+  if (c.rpf) {
+    sc += '<div class="stat"><div class="v">' + money(c.rpf[CUR], 0) + '</div><div class="l">Revenue per FTE · ' + num(c.hc[CUR]) + ' FTE</div>' +
+      '<div class="l ' + (c.rpf[CUR] >= c.rpf[YOY] ? 'good' : 'bad') + '">' + pct(c.rpf[CUR] / c.rpf[YOY] - 1, 1, true) + ' YoY · ' + (c.hc[CUR] - c.hc[YOY] >= 0 ? '+' : '') + num(c.hc[CUR] - c.hc[YOY]) + ' FTE</div></div>';
+  }
+  sc += '</div>';
+
+  // watch-list, built from rules so it stays correct as months are added
+  var w = [];
+  if (c.cash) {
+    var txt = c.cashOp && c.cashOp[CUR] < 0 ? 'Operating account overdrawn ' + money(c.cashOp[CUR], 2) + '; money market ' + money(c.cashMM[CUR], 2) + '. ' : '';
+    txt += 'Net cash ' + (M.burn12 < 0 ? 'down ' : 'up ') + money(Math.abs(M.burn12), 2) + ' in 12 months.';
+    if (c.cashMM) {
+      var dm = c.cashMM[CUR] - c.cashMM[PRI], prevDown = c.cashMM.slice(0, CUR).some(function (v, i) { return i && v < c.cashMM[i - 1] - 0.5; });
+      if (dm < -0.5 && !prevDown) txt += ' Money market drawn down for the first time (' + money(dm, 0) + ' in ' + Mo[CUR] + ').';
+    }
+    w.push(['Cash', txt]);
+  }
+  if (c.accpay) {
+    var rises = 0; for (var i = 1; i < n; i++) if (c.accpay[i] > c.accpay[i - 1]) rises++;
+    if (rises >= 0.9 * (n - 1)) w.push(['Accrued payroll', 'Balance ' + money(c.accpay[CUR], 2) + ', up ' + (rises === n - 1 ? 'every month' : 'in ' + rises + ' of ' + (n - 1) + ' months') + ' from ' + money(c.accpay[0], 2) + '. Masks true burn.']);
+  }
+  if (c.te && c.tl && c.ta && c.te[CUR] < 0) w.push(['Balance sheet', 'Equity ' + money(c.te[CUR]) + (c.loan ? ' with a ' + money(c.loan[CUR]) + ' term loan' : '') + '. Liabilities ' + money(c.tl[CUR]) + ' vs assets ' + money(c.ta[CUR]) + '.']);
+  if (M.churnSpike !== undefined) {
+    var k = M.churnSpike, mrrFell = c.mrr && c.openMRR && c.mrr[k] < c.openMRR[k];
+    w.push([Mo[k] + ' churn', money(-c.churnMRR[k], 0) + ' MRR lost in one month (' + (Math.abs(c.churnMRR[k]) / median(c.churnMRR.slice(-12).map(Math.abs))).toFixed(0) + '× the 12-month median)' + (mrrFell ? '; MRR fell that month.' : '.')]);
+  }
+  var bh0 = budgetHeadline(D); if (bh0 && bh0.v < 0) w.push(['Budget', bh0.text]);
+  checks.filter(function (x) { return !x.ok; }).slice(0, 2).forEach(function (x) { w.push(['Data check', x.name + ' — ' + x.detail.replace(/^\d+ months off\. First: /, '')]); });
+  var pos = [];
+  if (c.opinc && c.opinc[CUR] < 0 && c.opinc[CUR] > c.opinc[YOY]) pos.push('Operating loss narrowed to ' + money(-c.opinc[CUR], 0) + '/mo from ' + money(-c.opinc[YOY], 0));
+  if (c.gm && c.gm[CUR] >= amax(c.gm) - 1e-12) pos.push('gross margin at a ' + n + '-month high');
+  var wl = '<ul class="watch">' + w.map(function (x) { return '<li><b>' + esc(x[0]) + '</b><span>' + esc(x[1]) + '</span></li>'; }).join('') +
+    (pos.length ? '<li class="ok"><b>Positive</b><span>' + esc(pos.join('; ').replace(/^./, function (s) { return s.toUpperCase(); })) + '.</span></li>' : '') + '</ul>';
+  var side = card('Scorecard & watch-list', sc + wl, { span: 4 });
+
+  var parts = ['Revenue ' + (M.g >= 0 ? 'up ' : 'down ') + pct(Math.abs(M.g), 0) + ' YoY'], good = M.g >= 0;
+  if (c.opinc) {
+    if (c.opinc[CUR] < 0) { var narrow = c.opinc[CUR] > c.opinc[YOY]; parts.push(narrow ? 'losses narrowing' : 'losses widening'); good = good && narrow; }
+    else parts.push('operating profit ' + money(c.opinc[CUR], 0) + '/mo');
+  }
+  var head = parts.join(' and ');
+  if (c.cash) { var falling = c.cash[CUR] < c.cash[YOY]; head += falling ? (good ? ', but' : ';') + ' net cash is ' + money(c.cash[CUR]) + ' and falling.' : '; net cash ' + money(c.cash[CUR]) + ' and rising.'; }
+  else head += '.';
+  return '<h2 id="overview">Overview <span class="lead">' + esc(head) + '</span></h2>' + tileKey + '<div class="tiles">' + t.join('') + '</div>' +
+    '<div class="grid" style="margin-top:12px">' + revCard + side + '</div>';
+}
+
+function sProfitability(D, M) {
+  var c = D.col, L = D.labels, Mo = D.months, n = D.n, CUR = M.CUR, YOY = M.YOY, out = [];
+  // P&L card
+  function row(name, k, o) {
+    o = o || {}; if (!c[k]) return '';
+    var cu = c[k][CUR], y = c[k][YOY], d = cu - y, good = o.low ? d < 0 : d > 0, b0 = o.bold ? '<b>' : '', b1 = o.bold ? '</b>' : '';
+    var cv = o.pct ? pct(cu) : money(cu, 2), yv = o.pct ? pct(y) : money(y, 2), dv = o.pct ? pp(d) : money(d, 2);
+    return '<tr><td>' + b0 + name + b1 + '</td><td>' + b0 + yv + b1 + '</td><td>' + b0 + cv + b1 + '</td><td class="' + cls(good, d) + '">' + b0 + dv + b1 + '</td></tr>';
+  }
+  var rows = row('Subscription revenue', 'sub') + row('Usage &amp; overage', 'usage') + row('Professional services', 'svc') + row('Contra revenue', 'contra') +
+    row('Total revenue', 'rev', { bold: 1 }) + row('Cost of revenue', 'cogs', { low: 1 }) + row('Gross profit', 'gp', { bold: 1 }) + row('Gross margin', 'gm', { pct: 1 }) +
+    row('Sales &amp; marketing', 'sm', { low: 1 }) + row('R&amp;D', 'rd', { low: 1 }) + row('G&amp;A', 'ga', { low: 1 }) + row('Total opex', 'opex', { bold: 1, low: 1 }) +
+    row('Operating income', 'opinc', { bold: 1 }) + row('Operating margin', 'om', { pct: 1 }) + row('Other income', 'oth') + row('Income tax', 'tax', { low: 1 }) +
+    row('Net income', 'ni', { bold: 1 }) + row('Net margin', 'nm', { pct: 1 });
+  var flatOther = c.oth && c.tax && amax(c.oth) === amin(c.oth) && amax(c.tax) === amin(c.tax);
+  var plSub = 'Revenue ' + pct(M.g, 1, true) + (c.gp ? '; gross profit ' + pct(c.gp[CUR] / c.gp[YOY] - 1, 1, true) : '') +
+    (c.opinc ? '; operating ' + (c.opinc[CUR] < 0 ? 'loss ' + (c.opinc[CUR] > c.opinc[YOY] ? 'narrowed' : 'widened') : 'income ' + (c.opinc[CUR] > c.opinc[YOY] ? 'up' : 'down')) + ' by ' + money(Math.abs(c.opinc[CUR] - c.opinc[YOY]), 0) : '');
+  out.push(card('P&L: ' + Mo[CUR] + ' vs ' + Mo[YOY], '<table class="t"><thead><tr><th>P&amp;L (USD)</th><th>' + L[YOY] + '</th><th>' + L[CUR] + '</th><th>Change</th></tr></thead><tbody>' + rows + '</tbody></table>',
+    { sub: plSub, span: 4, style: 'grid-row:span 2', foot: 'Blue = improvement, amber = deterioration.' + (flatOther ? ' ' + esc(otherNote()) : '') }));
+
+  // margin chart with automatic annotations
+  if (c.gm && c.om) {
+    var ann = [];
+    spikes(c.gm, 0.015).forEach(function (s) { ann.push({ i: s.i, z: Math.abs(s.z), t: L[s.i] + ': gross margin ' + pct(c.gm[s.i]) }); });
+    if (c.ga) spikes(c.ga, 0.15 * median(c.ga)).filter(function (s) { return s.r > 0; }).forEach(function (s) { ann.push({ i: s.i, z: Math.abs(s.z), t: L[s.i] + ': G&A spike +' + money(s.r, 0) }); });
+    ann.sort(function (a, b) { return b.z - a.z; }); ann = ann.slice(0, 2).sort(function (a, b) { return a.i - b.i; });
+    var chart = lineChart([{ name: 'Gross margin', vals: c.gm, color: C.accent }, { name: 'Operating margin', vals: c.om, color: C.dim }], L,
+      { w: 760, h: 240, fmt: function (v) { return pct(v); }, pctAxis: true, title: 'Gross and operating margin', annotY: 0.4,
+        annotations: ann.map(function (a, k) { return [a.i, a.t, k]; }) });
+    var sub = 'Operating margin ' + (c.om[CUR] >= c.om[0] ? 'improved ' : 'declined ') + pp(c.om[CUR] - c.om[0], 0).replace(/^[+-]/, '') + ' over ' + n + ' months; gross margin ' + pct(c.gm[CUR], 0) + ' in ' + Mo[CUR];
+    var foot = '';
+    if (M.cogsStep) {
+      foot = 'Cost of revenue has run at ~' + pct(M.cogsStep.now, 0) + ' of revenue over the last 4 months, vs ~' + pct(M.cogsStep.before, 0) + ' in the 8 months before.';
+      if (c.capsw && c.capsw[CUR] > c.capsw[n - 5] * 1.1) foot += ' Capitalised software rose ' + money(c.capsw[n - 5], 2) + ' → ' + money(c.capsw[CUR], 2) + ' over the same period — worth confirming it is not a reclass.';
+    }
+    if (ann.length) foot += (foot ? ' ' : '') + 'Dashed lines mark months that stand out against their neighbours.';
+    out.push(card('Path to breakeven', legend([['Gross margin %', C.accent], ['Operating margin %', C.dim]]) + chart, { sub: sub, span: 8, foot: foot }));
+  }
+
+  // cost structure
+  if (c.cogs || c.sm) {
+    var cr = '';
+    [['Cost of revenue', 'cogs'], ['Sales & marketing', 'sm'], ['Research & development', 'rd'], ['General & administrative', 'ga']].forEach(function (p) {
+      var k = p[1]; if (!c[k]) return; var a = c[k][CUR] / c.rev[CUR], b = c[k][YOY] / c.rev[YOY], d = a - b;
+      cr += '<tr><td>' + esc(p[0]) + '</td><td>' + money(c[k][YOY], 0) + '</td><td>' + money(c[k][CUR], 0) + '</td><td>' + pct(b) + '</td><td>' + pct(a) + '</td><td class="' + (d < 0 ? 'pos' : d > 0.005 ? 'neg' : '') + '">' + pp(d) + '</td></tr>';
+    });
+    if (c.opex) { var oa = c.opex[CUR] / c.rev[CUR], ob = c.opex[YOY] / c.rev[YOY];
+      cr += '<tr><td><b>Total opex</b></td><td><b>' + money(c.opex[YOY], 2) + '</b></td><td><b>' + money(c.opex[CUR], 2) + '</b></td><td><b>' + pct(ob) + '</b></td><td><b>' + pct(oa) + '</b></td><td class="' + (oa < ob ? 'pos' : 'neg') + '"><b>' + pp(oa - ob) + '</b></td></tr>'; }
+    out.push(card('Cost structure: now vs a year ago', '<table class="t"><thead><tr><th>Line</th><th>' + L[YOY] + '</th><th>' + L[CUR] + '</th><th>% rev ' + L[YOY] + '</th><th>% rev ' + L[CUR] + '</th><th>Δ</th></tr></thead><tbody>' + cr + '</tbody></table>',
+      { sub: c.opex ? 'Total opex ' + (oa < ob ? 'fell' : 'rose') + ' from ' + pct(ob, 0) + ' to ' + pct(oa, 0) + ' of revenue' : '', span: 8, foot: 'Current month vs the same month last year. Lower share of revenue in blue; higher in amber.' }));
+  }
+
+  // operating income bars
+  if (c.opinc) {
+    var allNeg = c.opinc.every(function (v) { return v < 0; }), best = c.opinc[CUR] >= amax(c.opinc), ttm = sum(c.opinc, n - 12, n);
+    out.push(card(allNeg ? 'Operating loss by month' : 'Operating income by month', barChart(c.opinc, L, { w: 380, h: 240, title: 'Operating income by month', color: C.accent, negColor: C.dim }),
+      { sub: money(c.opinc[CUR], 0) + ' in ' + Mo[CUR] + (best ? ': ' + (allNeg ? 'smallest loss' : 'best month') + ' in the series' : '') + '. TTM operating ' + (ttm < 0 ? 'loss ' : 'income ') + money(ttm),
+        span: 4, foot: allNeg ? 'All ' + n + ' months are losses; bar height is the size of the loss.' : '' }));
+  }
+  // efficiency
+  if (c.rpf) {
+    out.push(card('Efficiency', '<div class="sub">Revenue per FTE, annualised</div>' +
+      lineChart([{ name: 'Revenue / FTE', vals: c.rpf, color: C.accent }], L, { w: 760, h: 150, fmt: function (v) { return money(v, 0); }, directLabel: false, zeroLine: false, axisFmt: function (v) { return money(v, 0); } }) +
+      '<div class="sub" style="margin-top:8px">Headcount (FTE)</div>' +
+      barChart(c.hc, L, { w: 760, h: 150, fmt: function (v) { return num(v) + ' FTE'; }, color: C.dim, axisFmt: function (v) { return num(v); } }),
+      { sub: 'Headcount ' + num(c.hc[0]) + ' → ' + num(c.hc[CUR]) + ' (' + pct(c.hc[CUR] / c.hc[0] - 1, 0, true) + ') while revenue grew ' + pct(c.rev[CUR] / c.rev[0] - 1, 0) + ': revenue per FTE ' + money(c.rpf[0], 0) + ' → ' + money(c.rpf[CUR], 0), span: 8 }));
+  } else out.push(missingCard('Efficiency', D, ['hc'], 8));
+
+  var head = (c.gm ? 'Gross margin ' + pct(c.gm[CUR], 0) : '') + (c.om ? ', operating margin ' + pct(c.om[CUR], 0) : '');
+  if (c.opex && c.opinc) head += c.opinc[CUR] > c.opinc[YOY] ? '; the result is improving because opex grows slower than revenue.' : '; the result is weakening as costs outpace revenue.';
+  return '<h2 id="profitability">Profitability <span class="lead">' + esc(head) + '</span></h2><div class="grid">' + out.join('') + '</div>';
+}
+
+function sCash(D, M) {
+  var c = D.col, L = D.labels, Mo = D.months, n = D.n, CUR = M.CUR, YOY = M.YOY, out = [];
+  if (!c.cash) return '<h2 id="cash">Cash</h2><div class="grid">' + missingCard('Cash position', D, ['cash', 'cashOp', 'cashMM'], 12) + '</div>';
+  var ser = [{ name: 'Net cash', vals: c.cash, color: C.accent }], leg = [['Net cash' + (c.cashOp ? ' (operating + money market)' : ''), C.accent]];
+  if (c.cashMM) { ser.push({ name: 'Money market', vals: c.cashMM, color: C.dim, dash: '4,3' }); leg.push(['Money market', C.dim]); }
+  if (c.cashOp) { ser.push({ name: 'Operating account', vals: c.cashOp, color: C.neg }); leg.push(['Operating account', C.neg]); }
+  var negM = c.cashOp ? c.cashOp.filter(function (v) { return v < 0; }).length : 0;
+  var sub = 'Net cash ' + money(c.cash[0], 2) + ' → ' + money(c.cash[CUR], 2) + '.' + (negM ? ' The operating account has been overdrawn in ' + negM + ' of ' + n + ' months and sits at ' + money(c.cashOp[CUR], 2) : '');
+  var foot = [];
+  if (c.cashMM) {
+    var diffs = c.cashMM.slice(1).map(function (v, i) { return v - c.cashMM[i]; }), d0 = diffs[0];
+    var steadyBefore = diffs.slice(0, -1).every(function (d) { return Math.abs(d - d0) < 0.5; }), last = diffs[diffs.length - 1];
+    if (steadyBefore && Math.abs(last - d0) < 0.5) foot.push('Money market moves by exactly $' + grp(d0) + ' every month (interest accrual, never swept).');
+    else if (steadyBefore) foot.push('Money market moved by exactly $' + grp(d0) + ' every month until ' + Mo[CUR] + ', when it ' + (last < 0 ? 'fell ' : 'rose ') + money(Math.abs(last), 2) + '.');
+    else foot.push('Money market ' + (last < 0 ? 'down ' : 'up ') + money(Math.abs(last), 2) + ' this month.');
+  }
+  if (c.loan) foot.push('Term loan of ' + money(c.loan[CUR]) + ' is not netted.');
+  if (negM) foot.push('If the overdraft is a facility it should be presented as debt.');
+  out.push(card('Cash position', legend(leg) + lineChart(ser, L, { w: 760, h: 330, fmt: function (v) { return money(v, 2); }, title: 'Cash position' }), { sub: sub, span: 8, foot: foot.join(' ') }));
+
+  // runway
+  if (M.hasYoY) {
+    function st(v, label, prior) {
+      var d = v - prior, txt = isNum(d) ? (d >= 0 ? '+' : '') + Math.round(d) + ' mo vs ' + L[YOY] + ' reading' : '';
+      return '<div class="stat"><div class="v">' + (v === Infinity ? 'n/a' : fmtMo(v) + ' months') + '</div><div class="l">' + label + '</div>' + (txt ? '<div class="l ' + (d >= 0 ? 'good' : 'bad') + '">' + txt + '</div>' : '') + '</div>';
+    }
+    var body = '<div class="stats" style="grid-template-columns:1fr 1fr">' +
+      st(M.runwayCash, M.burnRate > 0 ? 'Runway on cash burn (' + money(M.burnRate, 0) + '/mo, 12-mo avg)' : 'Cash rose over 12 months', M.runwayCashPrior) +
+      (c.ni ? st(M.runwayLoss, M.lossRate > 0 ? 'Runway on net loss (' + money(M.lossRate, 0) + '/mo, 6-mo avg)' : 'Profitable on a 6-month basis', M.runwayLossPrior) : '') + '</div>';
+    if (c.ni) {
+      var br = [['Net loss', M.ttmNi]], other = M.burn12 - M.ttmNi;
+      if (c.defrev) { var dd = c.defrev[CUR] - c.defrev[YOY]; br.push(['Deferred revenue collected ahead of recognition', dd]); other -= dd; }
+      if (c.accpay) { var da = c.accpay[CUR] - c.accpay[YOY]; br.push(['Accrued payroll & bonus not paid', da]); other -= da; }
+      if (c.ar) { var dr = -(c.ar[CUR] - c.ar[YOY]); br.push(['Receivables growth', dr]); other -= dr; }
+      br.push([c.accpay ? 'Other working capital, capex & non-cash items' : 'Other working capital (incl. accrued payroll, not in this file), capex & non-cash', other]);
+      body += '<table class="t"><thead><tr><th>Why they differ (last 12 months)</th><th>$</th></tr></thead><tbody>' +
+        br.map(function (b) { return '<tr><td>' + esc(b[0]) + '</td><td class="' + (b[1] < 0 ? 'neg' : 'pos') + '">' + money(b[1], 2) + '</td></tr>'; }).join('') +
+        '<tr><td><b>Change in net cash</b></td><td class="' + (M.burn12 < 0 ? 'neg' : 'pos') + '"><b>' + money(M.burn12, 2) + '</b></td></tr></tbody></table>';
+    }
+    var gap = M.burnRate < M.lossRate;
+    out.push(card('Runway', body, { span: 4, sub: gap ? 'Two readings: cash burn is cushioned by liabilities that have not yet been paid' : 'Cash burn and net loss tell a similar story',
+      foot: c.accpay ? 'If accrued bonuses are paid out, runway on cash converges toward the net-loss reading.' : 'The gap between the readings is working capital: cash collected ahead of revenue and costs not yet paid.' }));
+  }
+
+  // working capital
+  var wser = [], wleg = [];
+  if (c.defrev) { wser.push({ name: 'Deferred revenue', vals: c.defrev, color: C.accent }); wleg.push(['Deferred revenue', C.accent]); }
+  if (c.accpay) { wser.push({ name: 'Accrued payroll & bonus', vals: c.accpay, color: C.neg }); wleg.push(['Accrued payroll & bonus', C.neg]); }
+  if (c.ar) { wser.push({ name: 'Accounts receivable', vals: c.ar, color: C.dim }); wleg.push(['Accounts receivable', C.dim]); }
+  if (wser.length) {
+    var ws = c.accpay ? 'Accrued payroll ' + money(c.accpay[0], 2) + ' → ' + money(c.accpay[CUR], 2) + ' — the largest open question in this pack'
+      : (c.defrev ? 'Deferred revenue ' + money(c.defrev[CUR], 2) : '') + (c.ar ? (c.defrev ? '; ' : '') + 'receivables ' + money(c.ar[CUR], 2) : '');
+    var wf = (c.defrev && c.sub ? 'Deferred revenue is ' + (c.defrev[CUR] / c.sub[CUR]).toFixed(1) + ' months of subscription revenue. ' : '') +
+      (c.dso ? 'AR implies DSO of ~' + Math.round(c.dso[CUR]) + ' days (range ' + Math.round(amin(c.dso)) + '–' + Math.round(amax(c.dso)) + '). ' : '') +
+      (!c.accpay ? 'Accrued payroll &amp; bonus is not in this data file.' : '');
+    out.push(card('Working capital balances', legend(wleg) + lineChart(wser, L, { w: 560, h: 220, fmt: function (v) { return money(v, 2); }, title: 'Working capital balances' }), { sub: ws, span: 6, foot: wf }));
+  } else out.push(missingCard('Working capital balances', D, ['defrev', 'accpay', 'ar']));
+
+  // balance sheet
+  if (c.ta && c.tl && c.te) {
+    var liab = { defrev: 1, accpay: 1, loan: 1, tl: 1 };
+    var items = [['Cash (net)', 'cash'], ['Accounts receivable, net', 'arNet'], ['Deferred commissions', 'defcomm'], ['Capitalised software, net', 'capsw'], ['Total assets', 'ta'],
+                 ['Deferred revenue', 'defrev'], ['Accrued payroll & bonus', 'accpay'], ['Term loan', 'loan'], ['Total liabilities', 'tl'], ['Total equity', 'te']];
+    if (c.ar && c.allow) c.arNet = c.ar.map(function (v, i) { return v + c.allow[i]; });
+    var bt = items.filter(function (it) { return c[it[1]]; }).map(function (it) {
+      var a = c[it[1]][0], b = c[it[1]][CUR], d = b - a, good = liab[it[1]] ? d < 0 : d > 0;
+      return '<tr><td>' + esc(it[0]) + '</td><td>' + money(a, 2) + '</td><td>' + money(b, 2) + '</td><td class="' + (Math.abs(d) < 1 ? '' : good ? 'pos' : 'neg') + '">' + money(d, 2) + '</td></tr>';
+    }).join('');
+    out.push(card('Balance sheet: then and now', '<table class="t"><thead><tr><th>Balance sheet</th><th>' + L[0] + '</th><th>' + L[CUR] + '</th><th>Δ ' + n + ' mo</th></tr></thead><tbody>' + bt + '</tbody></table>',
+      { sub: 'Equity ' + money(c.te[0]) + ' → ' + money(c.te[CUR]) + (c.tl[CUR] > c.ta[CUR] ? '; liabilities exceed assets by ' + money(c.tl[CUR] - c.ta[CUR]) : ''), span: 6,
+        foot: 'Amber = movement that weakens the balance sheet (liabilities up, assets or equity down).' }));
+  } else out.push(missingCard('Balance sheet: then and now', D, ['ta', 'tl', 'te', 'accpay', 'loan']));
+
+  var head = 'Net cash ' + money(c.cash[CUR]);
+  if (M.hasYoY && c.ni) head += M.runwayCash === Infinity ? '; cash is not falling.' : '; roughly ' + runwayTxt(M.runwayCash) + ' months on current burn' + (M.runwayLoss < M.runwayCash ? ', but only ~' + runwayTxt(M.runwayLoss) + ' months on the net-loss run rate.' : '.');
+  return '<h2 id="cash">Cash <span class="lead">' + esc(head) + '</span></h2><div class="grid">' + out.join('') + '</div>';
+}
+
+function sCustomers(D, M) {
+  var c = D.col, L = D.labels, Mo = D.months, n = D.n, CUR = M.CUR, YOY = M.YOY, out = [];
+  if (!(c.mrr && c.newMRR && c.expMRR && c.conMRR && c.churnMRR)) return '<h2 id="customers">Customers</h2><div class="grid">' + missingCard('MRR bridge', D, ['openMRR', 'newMRR', 'expMRR', 'conMRR', 'churnMRR', 'mrr'], 12) + '</div>';
+  var o = c.openMRR[n - 12], cl = c.mrr[CUR], nn = sum(c.newMRR, n - 12, n), e = sum(c.expMRR, n - 12, n), k = sum(c.conMRR, n - 12, n), h = sum(c.churnMRR, n - 12, n);
+  var nrr = (o + e + k + h) / o;
+  var wf = waterfall([['Opening MRR ' + L[n - 12], o, 'total'], ['New', nn, 'delta'], ['Expansion', e, 'delta'], ['Contraction', k, 'delta'], ['Churn', h, 'delta'], ['Closing MRR ' + L[CUR], cl, 'total']],
+    { w: 760, h: 250, fmt: function (v) { return Math.abs(v) >= 1e6 ? money(v, 2) : money(v, 0); }, title: 'Trailing 12-month MRR bridge' });
+  var cover = -(k + h) > 0 ? e / -(k + h) : NaN;
+  out.push(card('MRR bridge: last 12 months', wf, { span: 8,
+    sub: 'Net new MRR ' + money(cl - o, 0) + ' (' + pct(cl / o - 1, 0, true) + '). Expansion ' + money(e, 0) + (isNum(cover) ? (cover >= 1 ? ' covered' : ' covered only ' + pct(cover, 0) + ' of') + ' churn and contraction ' + money(k + h, 0) + (cover >= 1 ? ' ' + cover.toFixed(1) + '× over' : '') : '') + '; net revenue retention ≈ ' + pct(nrr, 0),
+    foot: 'Movements from the contract ledger. Any cent-level rounding in the source bridge is absorbed in the closing bar.' }));
+
+  function l12(a) { return a.slice(-12); }
+  var tl = [];
+  if (c.netg) tl.push(tile('Net MRR growth', pct(c.netg[CUR]), pp(c.netg[CUR] - c.netg[YOY]) + ' YoY · 12-mo avg ' + pct(mean(l12(c.netg))), c.netg[CUR] >= c.netg[YOY], sparkline(l12(c.netg))));
+  if (c.revChurn) tl.push(tile('Gross revenue churn', pct(c.revChurn[CUR]), pp(c.revChurn[CUR] - c.revChurn[YOY]) + ' YoY · 12-mo avg ' + pct(mean(l12(c.revChurn))), c.revChurn[CUR] <= c.revChurn[YOY], sparkline(l12(c.revChurn), C.neg)));
+  if (c.logoChurn) tl.push(tile('Logo churn', pct(c.logoChurn[CUR]), pp(c.logoChurn[CUR] - c.logoChurn[YOY]) + ' YoY · ' + num(sum(c.churnCust, n - 12, n)) + ' logos lost in 12 mo', c.logoChurn[CUR] <= c.logoChurn[YOY], sparkline(l12(c.logoChurn), C.neg)));
+  if (c.arpa) tl.push(tile('ARPA (monthly)', '$' + grp(c.arpa[CUR]), pct(c.arpa[CUR] / c.arpa[YOY] - 1, 1, true) + ' YoY', c.arpa[CUR] >= c.arpa[YOY], sparkline(l12(c.arpa))));
+  out.push(card('Retention & pricing', '<div class="tiles" style="grid-template-columns:repeat(2,1fr)">' + tl.join('') + '</div>', { sub: 'Monthly rates. Amber sparklines are churn metrics (lower is better)', span: 4 }));
+
+  var fell = []; for (var i = 0; i < n; i++) if (c.mrr[i] < c.openMRR[i]) fell.push(Mo[i]);
+  var bestExp = c.expMRR[CUR] >= amax(c.expMRR);
+  var msub = (M.churnSpike !== undefined ? Mo[M.churnSpike] + ': ' + money(-c.churnMRR[M.churnSpike], 0) + ' churned' + (c.churnCust ? ' (' + num(c.churnCust[M.churnSpike]) + ' logos)' : '') + '. ' : '') +
+    (fell.length ? 'MRR fell in ' + (fell.length === 1 ? fell[0] + ' only' : fell.length + ' months') + '. ' : 'MRR grew every month. ') +
+    (bestExp ? Mo[CUR] + ' had the strongest expansion in the series (' + money(c.expMRR[CUR], 0) + ').' : '');
+  out.push(card('Monthly MRR movement', legend([['New', C.accent], ['Expansion', C.dim], ['Contraction', C.faint], ['Churn', C.neg]]) +
+    barChart(null, L, { w: 560, h: 230, fmt: function (v) { return money(v, 0); }, title: 'Monthly MRR movement', stacked: [
+      { name: 'New', vals: c.newMRR, color: C.accent }, { name: 'Expansion', vals: c.expMRR, color: C.dim }, { name: 'Contraction', vals: c.conMRR, color: C.faint }, { name: 'Churn', vals: c.churnMRR, color: C.neg }] }),
+    { sub: msub, span: 6, foot: 'Additions above the axis, losses below. Hover any month for the full breakdown.' }));
+
+  if (c.cust) {
+    var body = '<div class="sub">Active customers</div>' + lineChart([{ name: 'Active customers', vals: c.cust, color: C.accent }], L, { w: 560, h: 140, fmt: num, axisFmt: num, zeroLine: false, title: 'Active customers' });
+    if (c.newCust && c.churnCust) body += '<div class="sub" style="margin-top:6px">New (above) and churned (below) customers per month</div>' +
+      barChart(null, L, { w: 560, h: 120, fmt: num, axisFmt: num, title: 'New and churned customers', stacked: [{ name: 'New', vals: c.newCust, color: C.accent }, { name: 'Churned', vals: c.churnCust.map(function (v) { return -v; }), color: C.neg }] });
+    var csub = num(c.cust[0]) + ' → ' + num(c.cust[CUR]) + ' customers' + (c.newCust ? '; ' + num(sum(c.newCust, n - 12, n)) + ' added and ' + num(sum(c.churnCust, n - 12, n)) + ' lost in the last 12 months' : '') +
+      (c.arpa ? '. ARPA ' + pct(c.arpa[CUR] / c.arpa[0] - 1, 0, true) + ' over ' + n + ' months' : '');
+    out.push(card('Customer base', body, { sub: csub, span: 6 }));
+  }
+  var head = (c.cust ? num(c.cust[CUR]) + ' customers, ' : '') + 'ARR ' + money(c.arr[CUR]) + ', net revenue retention ≈ ' + pct(nrr, 0) +
+    (M.churnSpike !== undefined ? '; one churn spike in ' + Mo[M.churnSpike] + ' stands out in an otherwise steady book.' : '; churn steady over the last 12 months.');
+  return '<h2 id="customers">Customers <span class="lead">' + esc(head) + '</span></h2><div class="grid">' + out.join('') + '</div>';
+}
+
+function sChecks(D, checks, tbc) {
+  tbc = tbc || []; var fails = checks.concat(tbc).filter(function (x) { return !x.ok; }).length, total = checks.length + tbc.length;
+  var list = '<ul class="checks">' + checks.map(function (x) {
+    return '<li class="' + (x.ok ? '' : 'fail') + '"><span class="mk">' + (x.ok ? '✓' : '✗') + '</span><span>' + esc(x.name) + (x.ok ? '' : '<span class="dt">' + esc(x.detail) + '</span>') + '</span></li>';
+  }).join('') + '</ul>';
+  var important = ['ar', 'defrev', 'accpay', 'loan', 'ta', 'tl', 'te', 'hc', 'cashOp', 'cashMM', 'capsw'];
+  var miss = important.filter(function (k) { return !D.col[k]; }).map(colName);
+  var der = D.derived.filter(function (k) { return COLS[k]; }).map(colName);
+  var body = list + '<div class="foot">' + (miss.length ? 'Not in this file (views that need them say so): ' + esc(miss.join(', ')) + '. ' : '') +
+    'Margins, ARPA, churn rates, net MRR growth and revenue per FTE are calculated here from the file' + (der.length ? '; also calculated: ' + esc(der.join(', ')) : '') + '.</div>';
+  function lst(cs) { return '<ul class="checks">' + cs.map(function (x) {
+    return '<li class="' + (x.ok ? '' : 'fail') + '"><span class="mk">' + (x.ok ? '✓' : '✗') + '</span><span>' + esc(x.name) + (x.ok ? '' : '<span class="dt">' + esc(x.detail) + '</span>') + '</span></li>'; }).join('') + '</ul>'; }
+  var tbOnly = TB && !TB.error ? tbChecks(D) : [], bOnly = BUDGET && !BUDGET.error ? budgetChecks(D) : [];
+  var tbCard = tbOnly.length ? card('Trial balance — ' + TB.file, lst(tbOnly), { span: 12, foot: 'Debit-positive file: assets and expenses positive; revenue, liabilities and equity negative. Headings on row ' + TB.headerRow + '. These checks re-run against whichever summary file is loaded.' }) : '';
+  tbCard += bOnly.length ? card('Budget — ' + BUDGET.file, lst(bOnly), { span: 12, foot: 'All-positive file: revenue and costs both positive; contra revenue is positive and subtracted. Headings on row ' + BUDGET.headerRow + '.' }) : '';
+  return '<h2 id="checks">Data checks <span class="lead">' + (fails ? fails + ' of ' + total + ' checks failed. Resolve before this goes to the board.' : 'All ' + total + ' checks pass.') + '</span></h2>' +
+    '<div class="grid">' + card('Summary file — ' + D.file, body, { span: 12 }) + tbCard + '</div>';
+}
+
+
+// ---------------------------------------------------------------- trial balance: account-level P&L
+// Convention of THIS file only: debit-positive. Revenue and other-income accounts are flipped (×−1) for display.
+// A month = the account's Debit − Credit (activity), never its Closing Balance (cumulative on P&L accounts).
+var TBG = [['rev', 'Revenue', 'Total revenue', -1], ['cogs', 'Cost of revenue', 'Total cost of revenue', 1],
+           ['sm', 'Sales & marketing', 'Total sales & marketing', 1], ['rd', 'Research & development', 'Total research & development', 1],
+           ['ga', 'General & administrative', 'Total general & administrative', 1], ['oth', 'Other income / (expense)', 'Total other income / (expense)', -1],
+           ['tax', 'Income tax', 'Total income tax', 1]];
+function tbGroup(a) { var s = String(a); if (s[0] === '4') return 'rev'; if (s[0] === '5') return 'cogs'; if (s.slice(0, 2) === '60') return 'sm';
+  if (s.slice(0, 2) === '61') return 'rd'; if (s.slice(0, 2) === '62') return 'ga'; if (s[0] === '7') return 'oth'; if (s[0] === '8') return 'tax'; return 'bs'; }
+function tbSign(g) { for (var i = 0; i < TBG.length; i++) if (TBG[i][0] === g) return TBG[i][3]; return 1; }
+function prepTB(J) {
+  var P = J.periods.map(function (p) {
+    var pmn = parseMonth(p.label), acc = {};
+    p.accounts.forEach(function (r) { acc[r[0]] = { a: r[0], n: r[1], type: r[2], st: r[3], o: r[4], dr: r[5], cr: r[6], cl: r[7] }; });
+    return { label: p.label, tab: p.tab, ym: pmn.y * 12 + pmn.m - 1, acc: acc, list: p.accounts.map(function (r) { return r[0]; }) };
+  }).sort(function (x, y) { return y.ym - x.ym; });
+  var cur = P[0];
+  return { file: J.file, convention: J.convention, headerRow: J.headerRow, periods: P, cur: cur,
+           pm: P.filter(function (p) { return p.ym === cur.ym - 1; })[0] || null, py: P.filter(function (p) { return p.ym === cur.ym - 12; })[0] || null };
+}
+function tbVal(p, a, sg) { var x = p && p.acc[a]; return x ? sg * (x.dr - x.cr) : NaN; }
+function tbTotals(p) {
+  var t = {}; TBG.forEach(function (g) { t[g[0]] = 0; });
+  p.list.forEach(function (a) { var g = tbGroup(a); if (t[g] === undefined) return; t[g] += tbSign(g) * (p.acc[a].dr - p.acc[a].cr); });
+  t.gp = t.rev - t.cogs; t.opex = t.sm + t.rd + t.ga; t.op = t.gp - t.opex; t.ni = t.op + t.oth - t.tax; return t;
+}
+function usd2(v) { return (v < 0 ? '-' : '') + '$' + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fmtN(v) { var r = Math.round(v); return (r < 0 ? '-' : '') + grp(Math.abs(r)); }
+function fmtD(d) { var r = Math.round(d); return (r > 0 ? '+' : r < 0 ? '-' : '') + grp(Math.abs(r)); }
+// Compare trial-balance subtotals with the summary file for the same month.
+var TIE_LINES = [['Total revenue', 'rev', 'rev'], ['Cost of revenue', 'cogs', 'cogs'], ['Gross profit', 'gp', 'gp'], ['S&M', 'sm', 'sm'], ['R&D', 'rd', 'rd'],
+                 ['G&A', 'ga', 'ga'], ['Operating income', 'op', 'opinc'], ['Other income', 'oth', 'oth'], ['Income tax', 'tax', 'tax'], ['Net income', 'ni', 'ni']];
+function tbTie(D, p) {
+  var i = D.months.indexOf(p.label); if (i < 0) return { inSummary: false };
+  var t = tbTotals(p), bad = [];
+  TIE_LINES.forEach(function (L) { var s = D.col[L[2]]; if (!s) return; var d = t[L[1]] - s[i]; if (Math.abs(d) >= 0.01) bad.push(L[0] + ' off by ' + usd2(d)); });
+  return { inSummary: true, ok: !bad.length, bad: bad, rev: t.rev };
+}
+function tbChecks(D) {
+  if (!TB || TB.error) return [];
+  var P = TB.periods, out = [], first = P[0];
+  var nPL = first.list.filter(function (a) { return tbGroup(a) !== 'bs'; }).length;
+  var same = P.every(function (p) { return p.list.length === first.list.length && p.list.every(function (a) { return first.acc[a]; }); });
+  out.push({ name: first.list.length + ' account rows in every period (' + nPL + ' P&L, ' + (first.list.length - nPL) + ' balance sheet)', ok: same,
+             detail: same ? '' : 'Account lists differ: ' + P.map(function (p) { return p.label + ' ' + p.list.length; }).join(', ') });
+  var dc = P.map(function (p) { var dr = 0, cr = 0; p.list.forEach(function (a) { dr += p.acc[a].dr; cr += p.acc[a].cr; }); return { p: p, dr: dr, cr: cr }; });
+  var bal = dc.filter(function (x) { return Math.abs(x.dr - x.cr) >= 0.01; });
+  out.push({ name: 'Debits = credits — ' + dc.map(function (x) { return x.p.label + ': ' + usd2(x.dr); }).join(' · '), ok: !bal.length,
+             detail: bal.map(function (x) { return x.p.label + ': debits ' + usd2(x.dr) + ', credits ' + usd2(x.cr); }).join('; ') });
+  var roll = [];
+  P.forEach(function (p) { p.list.forEach(function (a) { var x = p.acc[a]; if (Math.abs(x.o + x.dr - x.cr - x.cl) >= 0.01) roll.push(p.label + ' ' + a); }); });
+  out.push({ name: 'Closing = opening + debit − credit on every account', ok: !roll.length, detail: roll.slice(0, 5).join(', ') });
+  if (TB.pm) {
+    var brk = TB.cur.list.filter(function (a) { var q = TB.pm.acc[a]; return !q || Math.abs(q.cl - TB.cur.acc[a].o) >= 0.01; });
+    out.push({ name: TB.pm.label + ' closing balances = ' + TB.cur.label + ' opening balances', ok: !brk.length, detail: brk.length ? 'Accounts: ' + brk.slice(0, 6).join(', ') : '' });
+  }
+  var ties = P.map(function (p) { return { p: p, r: tbTie(D, p) }; }), inS = ties.filter(function (x) { return x.r.inSummary; });
+  if (inS.length) {
+    var fails = inS.filter(function (x) { return !x.r.ok; });
+    out.push({ name: 'P&L ties to the summary file, revenue through net income (' + inS.map(function (x) { return x.p.label; }).join(', ') + '). ' + TB.cur.label + ' revenue: ' + usd2(tbTotals(TB.cur).rev),
+               ok: !fails.length, detail: fails.map(function (x) { return x.p.label + ': ' + x.r.bad.join(', '); }).join('; ') });
+  }
+  return out;
+}
+function otherNote() {
+  if (!TB || TB.error) return 'Other income and tax are the same every month.';
+  var parts = TB.cur.list.filter(function (a) { var g = tbGroup(a); return g === 'oth' || g === 'tax'; })
+    .map(function (a) { var x = TB.cur.acc[a]; return x.n + ' $' + grp(Math.abs(x.dr - x.cr)); });
+  return 'Other income and tax are flat because they are fixed monthly accruals (trial balance, ' + TB.cur.label + '): ' + parts.join(', ') + '.';
+}
+
+function sAccounts(D) {
+  if (!TB) return '';
+  if (TB.error) return '<h2 id="accounts">Account P&amp;L</h2><div class="grid">' + card('Account P&L', '<div class="missing">Could not read the embedded trial balance: ' + esc(TB.error) + '</div>', { span: 12 }) + '</div>';
+  var cur = TB.cur, pm = TB.pm, py = TB.py, P3 = [cur, pm, py], T = P3.map(function (p) { return p ? tbTotals(p) : null; });
+  function v3(f) { return T.map(function (t) { return t ? f(t) : NaN; }); }
+  function td(v) { return '<td>' + (isNum(v) ? fmtN(v) : '—') + '</td>'; }
+  function tdD(d, goodUp) { if (!isNum(d)) return '<td>—</td>'; var k = Math.abs(d) < 0.5 ? '' : ((d > 0) === goodUp ? 'pos' : 'neg'); return '<td class="' + k + '">' + fmtD(d) + '</td>'; }
+  function line(label, vals, goodUp, cl, acno) {
+    return '<tr class="' + cl + '"><td>' + (acno ? '<span class="acno">' + esc(acno) + '</span>' : '') + esc(label) + '</td>' +
+      td(vals[0]) + td(vals[1]) + tdD(vals[0] - vals[1], goodUp) + td(vals[2]) + tdD(vals[0] - vals[2], goodUp) + '</tr>';
+  }
+  var rows = '', movers = [];
+  TBG.forEach(function (G) {
+    var g = G[0], up = g === 'rev' || g === 'oth', accts = cur.list.filter(function (a) { return tbGroup(a) === g; });
+    rows += '<tr class="grp"><td colspan="6">' + esc(G[1]) + '</td></tr>';
+    accts.forEach(function (a) {
+      var vals = P3.map(function (p) { return tbVal(p, a, G[3]); });
+      rows += line(cur.acc[a].n, vals, up, 'acct', a);
+      movers.push({ n: cur.acc[a].n, m: vals[0] - vals[1], y: vals[0] - vals[2] });
+    });
+    if (accts.length > 1 || g === 'rev') rows += line(G[2], v3(function (t) { return t[g]; }), up, 'sub');
+    if (g === 'cogs') rows += line('Gross profit', v3(function (t) { return t.gp; }), true, 'key');
+    if (g === 'ga') { rows += line('Total operating expenses', v3(function (t) { return t.opex; }), false, 'sub'); rows += line('Operating income', v3(function (t) { return t.op; }), true, 'key'); }
+  });
+  rows += line('Net income', v3(function (t) { return t.ni; }), true, 'key');
+  var tieCells = P3.map(function (p) {
+    if (!p) return '<td>—</td>'; var r = tbTie(D, p);
+    if (!r.inSummary) return '<td>not in summary</td>';
+    return '<td class="' + (r.ok ? '' : 'bad') + '">' + (r.ok ? '✓ ties' : '✗ differs') + '</td>';
+  });
+  rows += '<tr class="tie"><td>Matches the summary file (revenue → net income)</td>' + tieCells[0] + tieCells[1] + '<td></td>' + tieCells[2] + '<td></td></tr>';
+  var hdr = '<thead><tr><th>Account (USD)</th><th>' + esc(cur.label) + '</th><th>' + (pm ? esc(pm.label) : '—') + '</th><th>Δ vs ' + (pm ? esc(pm.label.replace(/ 20(\d\d)$/, " $1")) : '—') +
+    '</th><th>' + (py ? esc(py.label) : '—') + '</th><th>Δ vs ' + (py ? esc(py.label.replace(/ 20(\d\d)$/, " $1")) : '—') + '</th></tr></thead>';
+
+  var bm = movers.slice().sort(function (x, y) { return Math.abs(y.m) - Math.abs(x.m); })[0], by = movers.slice().sort(function (x, y) { return Math.abs(y.y) - Math.abs(x.y); })[0];
+  var sub = (pm && bm ? 'Biggest move vs ' + pm.label + ': ' + bm.n + ' ' + fmtD(bm.m) + '. ' : '') + (py && by ? 'Biggest vs ' + py.label + ': ' + by.n + ' ' + fmtD(by.y) + '.' : '');
+  // expense accounts that carry credits this month (e.g. costs capitalised to the balance sheet)
+  var credits = [];
+  cur.list.forEach(function (a) {
+    var g = tbGroup(a), x = cur.acc[a]; if (['cogs', 'sm', 'rd', 'ga'].indexOf(g) < 0 || x.cr < 1) return;
+    var match = cur.list.filter(function (b) { return tbGroup(b) === 'bs' && Math.abs(cur.acc[b].dr - x.cr) < 1; })[0];
+    credits.push(x.n + ' is shown net of ' + usd2(x.cr) + ' credited to it in ' + cur.label + (match ? ' (matches the addition to ' + cur.acc[match].n + ', account ' + match + ')' : '') + '.');
+  });
+  var foot = 'Source: ' + esc(TB.file) + ' (tabs ' + esc(TB.periods.map(function (p) { return p.tab; }).join(', ')) + '; headings on row ' + TB.headerRow + '). ' +
+    'This file is debit-positive: revenue and other-income accounts are multiplied by −1 so revenue reads positive, which turns contra revenue negative. ' +
+    'Each month is the account\'s Debit − Credit for that month, not its Closing Balance, which on P&amp;L accounts is a running total. ' + esc(credits.join(' '));
+  var nPL = cur.list.filter(function (a) { return tbGroup(a) !== 'bs'; }).length;
+  var tiesAll = P3.filter(Boolean).every(function (p) { var r = tbTie(D, p); return r.inSummary && r.ok; });
+  var stale = D.months[D.n - 1] !== cur.label ? '<div class="stale">The rest of the cockpit now shows ' + esc(D.months[D.n - 1]) + '. This table stays at ' + esc(cur.label) + ' until a newer trial balance is added.</div>' : '';
+  var toggle = '<button class="btn tbtoggle" type="button" onclick="var s=this.closest(\'section\');s.classList.toggle(\'collapsed\');this.textContent=s.classList.contains(\'collapsed\')?\'Show all accounts\':\'Subtotals only\'">Subtotals only</button>';
+  var lead = nPL + ' P&L accounts from the trial balance, ' + cur.label + ' vs ' + (pm ? pm.label : '—') + ' and ' + (py ? py.label : '—') + (tiesAll ? '; every subtotal ties to the summary file.' : '; some subtotals do not tie to the summary file — see Data checks.');
+  return '<h2 id="accounts">Account P&amp;L <span class="lead">' + esc(lead) + '</span></h2><div class="grid">' +
+    card('Account-level P&L', toggle + stale + '<table class="t acc">' + hdr + '<tbody>' + rows + '</tbody></table>', { sub: sub, span: 12, foot: foot }) + '</div>';
+}
+
+
+// ---------------------------------------------------------------- budget: actual vs budget
+// Convention of THIS file only: every figure positive (costs too); contra revenue 40900 is SUBTRACTED; calendar fiscal year.
+// Variance = Actual − Budget. Revenue above budget is favorable; costs below budget are favorable.
+var BLINES = { sub: ['Subscription revenue', 1], svc: ['Professional services', 1], usage: ['Usage & overage', 1], contra: ['Contra revenue (credits)', -1],
+  rev: ['Total revenue', 1], cogs: ['Cost of revenue', -1], gp: ['Gross profit', 1], sm: ['Sales & marketing', -1], rd: ['Research & development', -1],
+  ga: ['General & administrative', -1], opex: ['Total operating expenses', -1], opinc: ['Operating income', 1], ni: ['Net income', 1] };
+function prepBudget(J) {
+  var acc = {}, list = [];
+  J.accounts.forEach(function (r) { acc[r[0]] = { a: r[0], n: r[1], cat: r[2], v: r[3] }; list.push(r[0]); });
+  return { file: J.file, convention: J.convention, headerRow: J.headerRow, months: J.months, acc: acc, list: list, totals: J.totals, assumptions: J.assumptions || '' };
+}
+function bAcct(a, m) { var x = BUDGET.acc[a], j = BUDGET.months.indexOf(m); return x && j >= 0 ? x.v[j] : NaN; }
+function bGroup(g, m) { var j = BUDGET.months.indexOf(m); if (j < 0) return NaN; var s = 0; BUDGET.list.forEach(function (a) { if (tbGroup(a) === g) s += BUDGET.acc[a].v[j]; }); return s; }
+function bLine(k, m) {
+  switch (k) {
+    case 'sub': return bAcct('40100', m); case 'svc': return bAcct('40200', m); case 'usage': return bAcct('40300', m); case 'contra': return bAcct('40900', m);
+    case 'rev': return bAcct('40100', m) + bAcct('40200', m) + bAcct('40300', m) - bAcct('40900', m);   // the budget file's own rule
+    case 'cogs': case 'sm': case 'rd': case 'ga': return bGroup(k, m);
+    case 'gp': return bLine('rev', m) - bLine('cogs', m);
+    case 'opex': return bLine('sm', m) + bLine('rd', m) + bLine('ga', m);
+    case 'opinc': return bLine('gp', m) - bLine('opex', m);
+    case 'oth': return bAcct('70100', m) - bAcct('70200', m);
+    case 'tax': return bAcct('80100', m);
+    case 'ni': return bLine('opinc', m) + bLine('oth', m) - bLine('tax', m);
+  }
+  return NaN;
+}
+// Actuals from the summary file, restated to the budget's presentation (contra revenue shown positive, as a deduction).
+function aLine(D, k, i) { var c = D.col; if (k === 'contra') return c.contra ? -c.contra[i] : NaN; return c[k] ? c[k][i] : NaN; }
+// Account actual from the trial balance, restated to the budget's all-positive presentation.
+function tbPos(p, a) { var x = p && p.acc[a]; if (!x) return NaN; var mv = x.dr - x.cr; return (a[0] === '4' && a !== '40900') || a === '70100' ? -mv : mv; }
+function acctGood(a) { return (a[0] === '4' && a !== '40900') || a === '70100' ? 1 : -1; }
+function m0(v) { return Math.abs(v) >= 1e6 ? money(v, 2) : money(v, 0); }
+function smoney(v, dp) { return isNum(v) ? (v >= 0 ? '+' : '-') + money(Math.abs(v), dp === undefined ? 2 : dp) : '—'; }
+function chip(good, v) { if (!isNum(v)) return ''; if (Math.abs(v) < 0.5) return '<span class="fu">On budget</span>'; return v * good > 0 ? '<span class="fu f">Favorable</span>' : '<span class="fu u">Unfavorable</span>'; }
+function vword(g, v) { return g > 0 ? (v >= 0 ? 'ahead of' : 'behind') : (v >= 0 ? 'over' : 'under'); }
+function capF(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function ytdMonths(D) {
+  var CUR = D.n - 1, out = [];
+  BUDGET.months.forEach(function (m) { var i = D.months.indexOf(m); if (i >= 0 && i <= CUR) out.push({ m: m, i: i }); });
+  return out;
+}
+function budgetChecks(D) {
+  if (!BUDGET || BUDGET.error) return [];
+  var out = [], ms = BUDGET.months, T = BUDGET.totals, curM = D.months[D.n - 1];
+  out.push({ name: BUDGET.list.length + ' accounts × ' + ms.length + ' months (' + ms[0] + ' – ' + ms[ms.length - 1] + '); headings on row ' + BUDGET.headerRow, ok: ms.length === 12, detail: ms.length + ' months found' });
+  function cmp(name, k, totName) {
+    if (!T[totName]) return; var bad = [];
+    ms.forEach(function (m, j) { var d = bLine(k, m) - T[totName][j]; if (Math.abs(d) >= 0.01) bad.push(m + ' off by ' + usd2(d)); });
+    out.push({ name: name, ok: !bad.length, detail: bad.slice(0, 3).join(', ') });
+  }
+  var shown = ms.indexOf(curM) >= 0 ? curM : ms[ms.length - 1];
+  cmp('Budgeted Total Revenue = subscription + services + usage − contra, every month (' + shown + ': ' + usd2(bLine('rev', shown)) + ')', 'rev', 'Total Revenue');
+  var subs = [['cogs', 'Total Cost of Revenue'], ['sm', 'Total Sales & Marketing'], ['rd', 'Total Research & Development'], ['ga', 'Total General & Administrative'], ['opinc', 'Budgeted Operating Income']], bad = [];
+  subs.forEach(function (s) { if (!T[s[1]]) return; ms.forEach(function (m, j) { if (Math.abs(bLine(s[0], m) - T[s[1]][j]) >= 0.01) bad.push(s[1] + ' ' + m); }); });
+  out.push({ name: 'Budget subtotals recalculate: cost of revenue, S&M, R&D, G&A, operating income', ok: !bad.length, detail: bad.slice(0, 4).join(', ') });
+  if (TB && !TB.error) {
+    var tbPL = TB.cur.list.filter(function (a) { return tbGroup(a) !== 'bs'; }), miss = tbPL.filter(function (a) { return !BUDGET.acc[a]; }), extra = BUDGET.list.filter(function (a) { return !TB.cur.acc[a]; });
+    out.push({ name: 'Budget uses the same ' + tbPL.length + ' P&L accounts as the trial balance', ok: !miss.length && !extra.length, detail: (miss.length ? 'Not budgeted: ' + miss.join(', ') + '. ' : '') + (extra.length ? 'Not in trial balance: ' + extra.join(', ') : '') });
+  }
+  var ytd = ytdMonths(D);
+  out.push({ name: 'Budget covers the loaded reporting month (' + curM + ')' + (ytd.length ? '; year to date = ' + ytd[0].m + ' – ' + curM : ''), ok: ms.indexOf(curM) >= 0, detail: 'The loaded data ends in ' + curM + ', outside the budget year.' });
+  return out;
+}
+function budgetHeadline(D) {   // for the Overview watch-list
+  if (!BUDGET || BUDGET.error || BUDGET.months.indexOf(D.months[D.n - 1]) < 0) return null;
+  var ytd = ytdMonths(D), v = ytd.reduce(function (s, x) { return s + aLine(D, 'opinc', x.i) - bLine('opinc', x.m); }, 0);
+  var drivers = ['sub', 'svc', 'usage', 'cogs', 'sm', 'rd', 'ga'].map(function (k) {
+    var d = ytd.reduce(function (s, x) { return s + aLine(D, k, x.i) - bLine(k, x.m); }, 0); return { k: k, d: d, impact: d * BLINES[k][1] }; })
+    .sort(function (x, y) { return x.impact - y.impact; }).slice(0, 2).filter(function (x) { return x.impact < 0; });
+  var dtxt = drivers.map(function (x) { return BLINES[x.k][0] + ' ' + smoney(x.d) + ' ' + vword(BLINES[x.k][1], x.d) + ' budget'; }).join(' and ');
+  return { v: v, drivers: dtxt, text: 'Year-to-date operating income ' + smoney(v) + ' vs budget (' + ytd[0].m.slice(0, 3) + '–' + D.months[D.n - 1] + ')' + (dtxt ? '; mainly ' + dtxt : '') + '.' };
+}
+
+function sBudget(D, M) {
+  if (!BUDGET) return '';
+  if (BUDGET.error) return '<h2 id="budget">Actual vs Budget</h2><div class="grid">' + card('Actual vs Budget', '<div class="missing">Could not read the embedded budget: ' + esc(BUDGET.error) + '</div>', { span: 12 }) + '</div>';
+  var CUR = D.n - 1, curM = D.months[CUR], ms = BUDGET.months;
+  if (ms.indexOf(curM) < 0) return '<h2 id="budget">Actual vs Budget</h2><div class="grid">' + card('Actual vs Budget', '<div class="missing">The budget covers ' + esc(ms[0]) + ' – ' + esc(ms[ms.length - 1]) + '. The loaded data ends in ' + esc(curM) + ', which is outside it.</div>', { span: 12 }) + '</div>';
+  var ytd = ytdMonths(D), mon = [{ m: curM, i: CUR }], ytdLbl = ytd[0].m.slice(0, 3) + '–' + curM.slice(0, 3) + ' ' + curM.slice(-4), curShort = D.labels[CUR];
+  function A(k, L) { return L.reduce(function (s, x) { return s + aLine(D, k, x.i); }, 0); }
+  function B(k, L) { return L.reduce(function (s, x) { return s + bLine(k, x.m); }, 0); }
+
+  // 1. scorecard by P&L line
+  var lines = ['rev', 'cogs', 'gp', 'sm', 'rd', 'ga', 'opinc', 'ni'], tot = { rev: 1, gp: 1, opinc: 1, ni: 1 };
+  var rows = lines.map(function (k) {
+    var g = BLINES[k][1], a1 = A(k, mon), b1 = B(k, mon), v1 = a1 - b1, a2 = A(k, ytd), b2 = B(k, ytd), v2 = a2 - b2;
+    function vc(v) { return '<td class="' + (Math.abs(v) < 0.5 ? '' : (v * g > 0 ? 'pos' : 'neg')) + '">' + smoney(v) + '</td>'; }
+    return '<tr class="' + (tot[k] ? 'tot' : '') + '"><td>' + esc(BLINES[k][0]) + '</td><td>' + money(a1, 2) + '</td><td>' + money(b1, 2) + '</td>' + vc(v1) + '<td>' + chip(g, v1) + '</td>' +
+      '<td class="sep">' + money(a2, 2) + '</td><td>' + money(b2, 2) + '</td>' + vc(v2) + '<td>' + pct(v2 / Math.abs(b2), 1, true) + '</td><td>' + chip(g, v2) + '</td></tr>';
+  }).join('');
+  var conv = '<div class="conv"><span><b>How to read this:</b> variance = actual − budget.</span><span><b>Revenue and profit:</b> above budget is <span class="fu f">Favorable</span></span>' +
+    '<span><b>Costs:</b> below budget is <span class="fu f">Favorable</span></span><span>Year to date = ' + esc(ytdLbl) + ' (fiscal year = calendar ' + esc(ms[0].slice(-4)) + ').</span></div>';
+  var table = '<table class="t bv"><thead><tr><th></th><th colspan="4" class="grp">' + esc(D.full[CUR]) + '</th><th colspan="5" class="grp sep">Year to date · ' + esc(ytdLbl) + '</th></tr>' +
+    '<tr><th>P&amp;L line</th><th>Actual</th><th>Budget</th><th>Variance</th><th></th><th class="sep">Actual</th><th>Budget</th><th>Variance</th><th>%</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
+  var oM = A('opinc', mon) - B('opinc', mon), oY = A('opinc', ytd) - B('opinc', ytd);
+  var scard = card('Scorecard: actual vs budget', conv + table, { span: 12,
+    sub: 'Operating income ' + smoney(oM) + ' vs budget in ' + D.full[CUR] + ' and ' + smoney(oY) + ' year to date (actual ' + money(A('opinc', ytd), 2) + ' vs budget ' + money(B('opinc', ytd), 2) + ').' });
+
+  // 2. year-to-date bridge: budget operating income → actual
+  var dk = [['Revenue', 'rev'], ['COGS', 'cogs'], ['S&M', 'sm'], ['R&D', 'rd'], ['G&A', 'ga']];
+  var steps = [['Budget YTD', B('opinc', ytd), 'total', C.faint]];
+  dk.forEach(function (x) { var v = A(x[1], ytd) - B(x[1], ytd); steps.push([x[0], v * BLINES[x[1]][1], 'delta']); });
+  steps.push(['Actual YTD', A('opinc', ytd), 'total', C.accent]);
+  var wf = waterfall(steps, { w: 560, h: 260, title: 'Year-to-date operating income: budget to actual', fmt: function (v) { return Math.abs(v) >= 1e6 ? money(v, 2) : money(v, 0); }, dfmt: function (v) { return smoney(v, 0); } });
+  var bridge = card('Year to date: where the gap comes from', legend([['Helps operating income', C.dim], ['Hurts operating income', C.neg]]) + wf,
+    { span: 6, sub: 'Budgeted operating income ' + money(B('opinc', ytd), 2) + ' → actual ' + money(A('opinc', ytd), 2) + ' (' + ytdLbl + '). Each bar is a P&L line\'s effect on operating income.' });
+
+  // 3. monthly operating-income variance
+  var mv = ytd.map(function (x) { return aLine(D, 'opinc', x.i) - bLine('opinc', x.m); }), ml = ytd.map(function (x) { return D.labels[x.i]; });
+  var behind = mv.filter(function (v) { return v < 0; }).length;
+  var trend = Math.abs(mv[mv.length - 1]) < 0.6 * Math.abs(mv[0]) ? 'narrowing' : Math.abs(mv[mv.length - 1]) > 1.4 * Math.abs(mv[0]) ? 'widening' : 'steady';
+  var mcard = card('Operating income vs budget, month by month', barChart(mv, ml, { w: 560, h: 260, color: C.accent, negColor: C.neg, fmt: function (v) { return smoney(v, 0); }, title: 'Monthly operating income variance' }),
+    { span: 6, sub: (behind ? 'Behind budget in ' + behind + ' of ' + mv.length + ' months' : 'Ahead of budget every month') + '; ' + D.labels[CUR] + ': ' + smoney(mv[mv.length - 1], 0) + '. Gap ' + trend + ' since ' + ml[0] + ' (' + smoney(mv[0], 0) + ').',
+      foot: 'Blue bars beat budget; amber bars fell short.' });
+
+  // 4. what moved — latest trial-balance month, by account
+  var acctCard = '';
+  if (TB && !TB.error && ms.indexOf(TB.cur.label) >= 0) {
+    var p = TB.cur, pm = TB.pm, py = TB.py, tm = p.label;
+    var cands = BUDGET.list.filter(function (a) { return p.acc[a]; }).map(function (a) {
+      var act = tbPos(p, a), bud = bAcct(a, tm); return { a: a, n: p.acc[a].n, act: act, bud: bud, v: act - bud, g: acctGood(a) }; })
+      .sort(function (x, y) { return Math.abs(y.v) - Math.abs(x.v); }).slice(0, 5);
+    var pairs = { '60120': '1250', '50600': '1300' };
+    function why(x) {
+      var bits = [], jul = tbPos(pm, x.a), ly = tbPos(py, x.a), isAm = /amorti[sz]ation/i.test(x.n);
+      if (isAm) {
+        bits.push('Non-cash accounting charge. Budget assumed ' + m0(x.bud) + '; actual has ' + (isNum(ly) && x.act < ly ? 'fallen to ' + m0(x.act) + ' from ' + m0(ly) + ' a year ago' : 'run at ' + m0(x.act)));
+        var bs = pairs[x.a];
+        if (bs && p.acc[bs] && py && py.acc[bs]) {
+          var b0 = py.acc[bs].cl, b1 = p.acc[bs].cl, nm = p.acc[bs].n;
+          bits.push(nm + ' balance ' + (b1 < b0 ? 'fell' : 'rose') + ' from ' + m0(b0) + ' to ' + m0(b1) + (b1 > b0 && x.act < ly ? ', so amortization fell while the asset grew — worth asking why' : ''));
+        }
+        if (x.v * x.g > 0) bits.push('favorable on paper, not an operating saving');
+      } else if (x.a === '40100' && D.col.sub) {
+        var j0 = D.months.indexOf(ms[0]), b0m = bAcct('40100', ms[0]), span = ms.indexOf(tm);
+        if (j0 >= 0 && span > 0) {
+          var planG = Math.pow(x.bud / b0m, 1 / span) - 1, actG = Math.pow(x.act / D.col.sub[j0], 1 / span) - 1;
+          bits.push('Plan assumes ' + pct(planG, 1) + ' growth a month; actual has grown ' + pct(actG, 1) + ' a month since ' + ms[0].slice(0, 3));
+        }
+        if (M.churnSpike !== undefined && ms.indexOf(D.months[M.churnSpike]) >= 0) bits.push(D.months[M.churnSpike].slice(0, 3) + '\'s churn (' + money(-D.col.churnMRR[M.churnSpike], 0) + ' MRR lost) reset the base');
+      } else {
+        bits.push('Budget assumed ' + m0(x.bud) + '; actual ' + m0(x.act));
+        if (isNum(jul)) bits.push(Math.abs(x.act - jul) <= 0.02 * Math.abs(x.act) ? 'flat vs ' + pm.label.slice(0, 3) + ', so this is the run-rate, not a one-off' : (x.act > jul ? 'up ' : 'down ') + money(Math.abs(x.act - jul), 0) + ' vs ' + pm.label.slice(0, 3));
+        if (isNum(ly) && ly) bits.push(pct(x.act / ly - 1, 0, true) + ' vs ' + py.label);
+      }
+      if (p.acc[x.a].cr >= 1 && tbGroup(x.a) !== 'rev' && tbGroup(x.a) !== 'oth') bits.push('shown net of ' + money(p.acc[x.a].cr, 0) + ' capitalized to the balance sheet');
+      return capF(bits.join('; ')) + '.';
+    }
+    var li = cands.map(function (x) {
+      var f = x.v * x.g > 0;
+      return '<li><div class="top"><span class="nm">' + esc(x.n) + '<small>' + esc(x.a) + '</small></span><span><span class="amt ' + (f ? 'f' : 'u') + '">' + smoney(x.v, 0) + '</span> ' + chip(x.g, x.v) + '</span></div>' +
+        '<div class="ab">Actual ' + m0(x.act) + ' · Budget ' + m0(x.bud) + '</div><div class="why">' + esc(why(x)) + '</div></li>';
+    }).join('');
+    acctCard = card('What moved in ' + tm + ' — top 5 accounts', '<ul class="moved">' + li + '</ul>',
+      { span: 6, sub: 'The five accounts furthest from budget, from the trial balance. The other ' + (BUDGET.list.length - 5) + ' accounts are left out on purpose.',
+        foot: tm !== curM ? 'Account detail is for ' + esc(tm) + ' (latest trial balance); the rest of this section shows ' + esc(curM) + '.' : '' });
+  }
+
+  // 5. what moved — year to date, by P&L line
+  var yk = ['sub', 'svc', 'usage', 'contra', 'cogs', 'sm', 'rd', 'ga'].map(function (k) { return { k: k, v: A(k, ytd) - B(k, ytd), g: BLINES[k][1] }; })
+    .sort(function (x, y) { return Math.abs(y.v) - Math.abs(x.v); }).slice(0, 4);
+  var oneOff = /no one-off/i.test(BUDGET.assumptions);
+  function ywhy(x) {
+    var k = x.k, vs = ytd.map(function (y) { return aLine(D, k, y.i) - bLine(k, y.m); }), n = vs.length, lab = ytd.map(function (y) { return y.m.slice(0, 3); }), parts = [];
+    var flips = 0, jj = -1; for (var t = 1; t < n; t++) if ((vs[t] >= 0) !== (vs[t - 1] >= 0)) { flips++; jj = t; }
+    if (!flips) parts.push(capF(vword(x.g, vs[0])) + ' budget in all ' + n + ' months');
+    else if (flips === 1) parts.push(capF(vword(x.g, vs[0])) + ' budget ' + lab[0] + '–' + lab[jj - 1] + ', ' + vword(x.g, vs[jj]) + ' since ' + lab[jj] +
+      (k === 'sub' && M.churnSpike !== undefined && D.months[M.churnSpike] === ytd[jj].m ? ', the month of the ' + money(-D.col.churnMRR[M.churnSpike], 0) + ' churn spike' : ''));
+    else parts.push(capF(vword(x.g, x.v)) + ' budget in ' + vs.filter(function (v) { return (v >= 0) === (x.v >= 0); }).length + ' of ' + n + ' months');
+    var ab = vs.map(Math.abs), mi = ab.indexOf(Math.max.apply(null, ab)), others = vs.filter(function (v, t) { return t !== mi; });
+    if (n >= 4 && ab[mi] > 2.5 * median(others.map(Math.abs))) {
+      parts.push('largest in ' + lab[mi] + ' (' + smoney(vs[mi], 0) + ')' + (oneOff && vs[mi] * x.g < 0 ? ', a one-off the budget did not include' : '') + '; the other months average ' + smoney(mean(others), 0));
+    } else {
+      parts.push('averaging ' + smoney(mean(vs), 0) + ' a month');
+      var tr = Math.abs(vs[n - 1]) < 0.6 * Math.abs(vs[0]) ? 'narrowing' : Math.abs(vs[n - 1]) > 1.4 * Math.abs(vs[0]) ? 'widening' : '';
+      if (tr && !flips) parts.push('gap ' + tr + ' from ' + smoney(vs[0], 0) + ' in ' + lab[0] + ' to ' + smoney(vs[n - 1], 0) + ' in ' + lab[n - 1]);
+    }
+    var s = capF(parts.join('; ')) + '.';
+    if (TB && !TB.error && ms.indexOf(TB.cur.label) >= 0) {   // cross-reference the account detail
+      var ti = ytd.filter(function (y) { return y.m === TB.cur.label; })[0];
+      if (ti && ['cogs', 'sm', 'rd', 'ga', 'sub'].indexOf(k) >= 0) {
+        var lv = aLine(D, k, ti.i) - bLine(k, ti.m), best = null;
+        TB.cur.list.forEach(function (a) { if ((k === 'sub' ? a === '40100' : tbGroup(a) === k) && BUDGET.acc[a]) { var v = tbPos(TB.cur, a) - bAcct(a, ti.m); if (!best || Math.abs(v) > Math.abs(best.v)) best = { a: a, v: v }; } });
+        if (best && k !== 'sub' && Math.abs(lv) > 1 && best.v * lv > 0 && Math.abs(best.v) >= 0.6 * Math.abs(lv))
+          s += ' In ' + TB.cur.label.slice(0, 3) + ', ' + TB.cur.acc[best.a].n + ' alone is ' + smoney(best.v, 0) + (/amorti[sz]ation/i.test(TB.cur.acc[best.a].n) ? ' (non-cash)' : '') + '.';
+      }
+    }
+    return s;
+  }
+  var yli = yk.map(function (x) {
+    var f = x.v * x.g > 0;
+    return '<li><div class="top"><span class="nm">' + esc(BLINES[x.k][0]) + '</span><span><span class="amt ' + (f ? 'f' : 'u') + '">' + smoney(x.v, 0) + '</span> ' + chip(x.g, x.v) + '</span></div>' +
+      '<div class="ab">Actual ' + money(A(x.k, ytd), 2) + ' · Budget ' + money(B(x.k, ytd), 2) + '</div><div class="why">' + esc(ywhy(x)) + '</div></li>';
+  }).join('');
+  var ycard = card('What moved year to date — top 4 P&L lines', '<ul class="moved">' + yli + '</ul>',
+    { span: acctCard ? 6 : 12, sub: 'The four P&L lines furthest from budget, ' + ytdLbl + '. Year to date is by line because account detail exists only for the trial-balance month.' });
+
+  var foot = 'Budget: ' + esc(BUDGET.file) + ' (headings on row ' + BUDGET.headerRow + '). That file states every figure as positive and subtracts contra revenue, so actual contra revenue (negative in the summary file) is shown here as a positive deduction. ' +
+    (BUDGET.assumptions ? 'Budget basis, per the file: ' + esc(BUDGET.assumptions) : '');
+  var head = D.full[CUR] + ': operating income ' + smoney(oM, 0) + ' vs budget; year to date ' + smoney(oY) + ' (' + pct(oY / Math.abs(B('opinc', ytd)), 0, true) + ').';
+  var bh = budgetHeadline(D); if (bh && bh.drivers) head += ' Mainly ' + bh.drivers + '.';
+  return '<h2 id="budget">Actual vs Budget <span class="lead">' + esc(head) + '</span></h2><div class="grid">' + scard + bridge + mcard + ycard + acctCard + '</div>' +
+    '<div class="card span12" style="margin-top:12px;padding:10px 18px"><div class="foot" style="border:none;margin:0;padding:0">' + foot + '</div></div>';
+}
+
+// ---------------------------------------------------------------- render
+var STATE = null;
+function render(D) {
+  var checks = runChecks(D), tbc = tbChecks(D).concat(budgetChecks(D)), M = metrics(D), fails = checks.concat(tbc).filter(function (x) { return !x.ok; }).length, c = D.col;
+  document.getElementById('content').innerHTML = sOverview(D, M, checks.concat(tbc)) + sProfitability(D, M) + sAccounts(D) + sBudget(D, M) + sCash(D, M) + sCustomers(D, M) + sChecks(D, checks, tbc);
+  var Mo = D.months, CUR = M.CUR;
+  document.title = 'CFO Cockpit — ' + Mo[CUR];
+  document.getElementById('period').innerHTML = '<div><div class="pl">' + esc(COMPANY) + ' · Reporting month</div><div class="pvrow"><div class="pv">' + esc(D.full[CUR]) + '</div>' +
+    '<span class="fict" title="Meridian Cloud, Inc. is a fictional company. No real financial data appears in this dashboard.">Fictional company · illustrative data</span></div></div>' +
+    '<div class="pd">Compared with <b>' + (M.hasYoY ? esc(D.full[M.YOY]) : 'n/a') + '</b> (same month last year)<br>' +
+    D.n + ' months of data, ' + esc(Mo[0]) + ' – ' + esc(Mo[CUR]) + ' · Source: <b>' + esc(D.file) + '</b></div>';
+  document.getElementById('co').innerHTML = esc(COMPANY) + '<br>Board view · <b>' + esc(Mo[CUR]) + '</b><br><span class="fict">Fictional company</span>';
+  document.getElementById('dataName').textContent = D.file;
+  document.getElementById('dataStat').innerHTML = D.n + ' months · ' + esc(Mo[0]) + ' – ' + esc(Mo[CUR]) + '<br>' +
+    (fails ? '<span class="bad">⚠ ' + fails + ' of ' + (checks.length + tbc.length) + ' checks failed</span>' : '<span class="good">✓ All ' + (checks.length + tbc.length) + ' checks pass</span>') +
+    (TB && !TB.error ? '<br>Trial balance: ' + esc(TB.cur.label) : '');
+  var fc = document.getElementById('flag-checks'); fc.textContent = fails ? '✗ ' + fails : '✓'; fc.className = 'flag' + (fails ? '' : ' ok');
+  var flat = c.oth && c.tax && amax(c.oth) === amin(c.oth) && amax(c.tax) === amin(c.tax);
+  document.getElementById('foot').textContent = 'Net cash = operating cash + money market' + (c.loan ? '; the term loan is shown separately' : '') + '. ' +
+    (flat ? otherNote() + ' ' : '') +
+    'Comparisons are to the same month of the prior year unless stated. Every figure is recalculated from the loaded file; see Data checks. ' + COMPANY + ' is a fictional company and all figures are illustrative; no real financial data appears in this dashboard.';
+  STATE = { D: D, csv: D._csv };
+  bindHover(); spy();
+}
+function banner(kind, html) {
+  document.getElementById('banner').innerHTML = html ? '<div class="banner ' + kind + '"><span>' + html + '</span><button type="button" aria-label="Dismiss" onclick="this.parentNode.remove()">×</button></div>' : '';
+}
+function loadText(text, name, announce) {
+  try {
+    var prev = STATE ? STATE.D.months[STATE.D.n - 1] : null, D = buildData(text, name); D._csv = text;
+    render(D);
+    if (announce) {
+      var now = D.months[D.n - 1], fails = runChecks(D).filter(function (x) { return !x.ok; }).length;
+      banner(fails ? 'err' : 'ok', 'Loaded <b>' + esc(name) + '</b>: now showing <b>' + esc(now) + '</b> (' + D.n + ' months' + (prev && prev !== now ? ', was ' + esc(prev) : '') + '). ' +
+        (fails ? fails + ' data check' + (fails > 1 ? 's' : '') + ' failed — <a href="#checks">see Data checks</a>.' : 'All data checks pass.'));
+      window.scrollTo(0, 0);
+    }
+  } catch (err) {
+    banner('err', 'Could not load <b>' + esc(name) + '</b>: ' + esc(err.message) + ' The cockpit still shows the previous data.');
+  }
+}
+function readFile(file) {
+  if (!file) return;
+  var r = new FileReader();
+  r.onload = function () { loadText(String(r.result), file.name, true); };
+  r.onerror = function () { banner('err', 'Could not read ' + esc(file.name) + '.'); };
+  r.readAsText(file);
+}
+
+// ---------------------------------------------------------------- interactions
+var tip = document.getElementById('tip');
+function move(e) { var x = e.clientX + 14, y = e.clientY + 14, r = tip.getBoundingClientRect(); if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14; if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14; tip.style.left = x + 'px'; tip.style.top = y + 'px'; }
+function bindHover() {
+  document.querySelectorAll('svg.chart').forEach(function (svg) {
+    var xh = svg.querySelector('.xh');
+    svg.querySelectorAll('rect[data-tip]').forEach(function (r) {
+      r.addEventListener('mouseenter', function (e) { tip.textContent = r.getAttribute('data-tip'); tip.style.display = 'block'; move(e); if (xh) { xh.style.display = ''; xh.setAttribute('x1', r.getAttribute('data-x')); xh.setAttribute('x2', r.getAttribute('data-x')); } });
+      r.addEventListener('mousemove', move);
+      r.addEventListener('mouseleave', function () { tip.style.display = 'none'; if (xh) xh.style.display = 'none'; });
+    });
+  });
+}
+var links = [].slice.call(document.querySelectorAll('aside nav a'));
+function spy() {
+  var y = window.scrollY + 120, idx = 0;
+  links.forEach(function (a, i) { var s = document.querySelector(a.getAttribute('href')); if (s && s.offsetTop <= y) idx = i; });
+  if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 4) idx = links.length - 1;
+  links.forEach(function (a, i) { a.classList.toggle('active', i === idx); });
+}
+window.addEventListener('scroll', spy, { passive: true });
+
+var fileIn = document.getElementById('fileIn');
+document.getElementById('loadBtn').addEventListener('click', function () { fileIn.value = ''; fileIn.click(); });
+fileIn.addEventListener('change', function () { readFile(fileIn.files[0]); });
+var drop = document.getElementById('drop'), dragN = 0;
+window.addEventListener('dragenter', function (e) { if (e.dataTransfer && [].indexOf.call(e.dataTransfer.types, 'Files') >= 0) { dragN++; drop.style.display = 'flex'; } });
+window.addEventListener('dragleave', function () { if (--dragN <= 0) { dragN = 0; drop.style.display = 'none'; } });
+window.addEventListener('dragover', function (e) { e.preventDefault(); });
+window.addEventListener('drop', function (e) { e.preventDefault(); dragN = 0; drop.style.display = 'none'; if (e.dataTransfer.files.length) readFile(e.dataTransfer.files[0]); });
+
+document.getElementById('saveBtn').addEventListener('click', function () {
+  if (!STATE) return;
+  var D = STATE.D, safe = STATE.csv.replace(/<\/(script)/gi, '<\\/$1');
+  var html = PRISTINE.replace(/(<script type="text\/csv" id="cockpit-data")[^>]*>[\s\S]*?(<\/script>)/,
+    function (m, a, b) { return a + ' data-name="' + esc(D.file) + '">\n' + safe + '\n' + b; });
+  var blob = new Blob([html], { type: 'text/html' }), a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'CFO_Cockpit_' + D.months[D.n - 1].replace(' ', '_') + '.html';
+  document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  banner('ok', 'Saved <b>' + esc(a.download) + '</b>. It opens at ' + esc(D.months[D.n - 1]) + ' with this data built in, and keeps the Load data button.');
+});
+
+// ---------------------------------------------------------------- boot
+var TB = null;
+(function () { var el = document.getElementById('tb-data'); var t = el ? el.textContent.trim() : ''; if (!t || t === '__TB__') return;
+  try { TB = prepTB(JSON.parse(t)); } catch (e) { TB = { error: e.message }; } })();
+if (!TB) { var na = document.getElementById('nav-accounts'); if (na) na.style.display = 'none'; }
+var BUDGET = null;
+(function () { var el = document.getElementById('budget-data'); var t = el ? el.textContent.trim() : ''; if (!t || t === '__BUDGET__') return;
+  try { BUDGET = prepBudget(JSON.parse(t)); } catch (e) { BUDGET = { error: e.message }; } })();
+if (!BUDGET) { var nb = document.getElementById('nav-budget'); if (nb) nb.style.display = 'none'; }
+var embedded = document.getElementById('cockpit-data');
+loadText(embedded.textContent.replace(/<\\\/(script)/gi, '</$1').trim(), embedded.getAttribute('data-name') || 'built-in data', false);
+})();
+
+</script>
+</body></html>
